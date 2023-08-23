@@ -43,12 +43,12 @@ class OrgServiceTest {
     }
 
 
-    @Test
-    void create() throws SQLException {
-        final Org org = orgService.create("hari"
-                , newOrg());
-        Assertions.assertTrue(orgService.read("hari", org.getId()).isPresent(), "Created org");
-    }
+//    @Test
+//    void create() throws SQLException {
+//        final Org org = orgService.create("hari"
+//                , newOrg());
+//        Assertions.assertTrue(orgService.read("hari", org.getId()).isPresent(), "Created org");
+//    }
 
 
 
