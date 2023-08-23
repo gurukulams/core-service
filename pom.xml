@@ -130,11 +130,9 @@
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>${jacoco.version}</version>
 				<configuration>
-					<excludes>
-						<exclude>com/gurukulams/core/store/**</exclude>
-						<exclude>com/gurukulams/core/model/**</exclude>
-						<exclude>com/gurukulams/core/**</exclude>
-					</excludes>
+					<includes>
+						<exclude>com/gurukulams/core/service/**</exclude>
+					</includes>
 				</configuration>
 				<executions>
 					<execution>
