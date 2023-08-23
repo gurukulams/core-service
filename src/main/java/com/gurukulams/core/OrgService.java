@@ -78,15 +78,6 @@ public class OrgService {
         return this.orgStore.delete(id) == 1;
     }
 
-    /**
-     * Dletes all the org.
-     *
-     * @param userName
-     * @return noOfOrgsDeleted
-     */
-    public int delete(final String userName) throws SQLException {
-        return this.orgStore.delete().execute();
-    }
 
     /**
      * Lists all the orgs.

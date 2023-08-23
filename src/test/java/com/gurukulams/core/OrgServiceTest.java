@@ -51,17 +51,6 @@ class OrgServiceTest {
     }
 
 
-    /**
-     * Gets practice.
-     *
-     * @return the practice
-     */
-    Org newOrg() {
-        Org org = new Org();
-        org.setId(UUID.randomUUID().toString());
-        org.setTitle("Hariorg" + org.getId());
-        return org;
-    }
 
 
     //
@@ -111,5 +100,18 @@ class OrgServiceTest {
         Assertions.assertEquals(2, listOfCommunities.size());
 
     }
+
+    /**
+     * Gets new org.
+     *
+     * @return the org
+     */
+    Org newOrg() {
+        Org org = new Org();
+        org.setId(UUID.randomUUID().toString());
+        org.setTitle("Hariorg" + org.getId());
+        return org;
+    }
+
 
 }
