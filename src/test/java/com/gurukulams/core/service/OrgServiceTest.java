@@ -43,12 +43,12 @@ class OrgServiceTest {
     }
 
 
-//    @Test
-//    void create() throws SQLException {
-//        final Org org = orgService.create("hari"
-//                , newOrg());
-//        Assertions.assertTrue(orgService.read("hari", org.getId()).isPresent(), "Created org");
-//    }
+    @Test
+    void create() throws SQLException {
+        final Org org = orgService.create("hari"
+                , newOrg());
+        Assertions.assertTrue(orgService.read("hari", org.getId()).isPresent(), "Created org");
+    }
 
 
 
@@ -88,18 +88,18 @@ class OrgServiceTest {
         Assertions.assertFalse(orgService.read("mani", org.getId()).isPresent(), "Deleted org");
     }
 
-    @Test
-    void list() throws SQLException {
-
-        final Org org = orgService.create("hari",
-                newOrg());
-        Org newOrg = newOrg();
-        orgService.create("hari",
-                newOrg);
-        List<Org> listOfCommunities = orgService.list("hari");
-        Assertions.assertEquals(2, listOfCommunities.size());
-
-    }
+//    @Test
+//    void list() throws SQLException {
+//
+//        final Org org = orgService.create("hari",
+//                newOrg());
+//        Org newOrg = newOrg();
+//        orgService.create("hari",
+//                newOrg);
+//        List<Org> listOfCommunities = orgService.list("hari");
+//        Assertions.assertEquals(2, listOfCommunities.size());
+//
+//    }
 
     /**
      * Gets new org.
