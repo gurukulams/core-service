@@ -7,13 +7,11 @@ import javax.sql.DataSource;
 
 public class TestUtil {
     public static GurukulamsManager gurukulamsManager() {
-
         PGSimpleDataSource ds = new PGSimpleDataSource() ;
-        ds.setServerName( "localhost" );
+        ds.setURL( "jdbc:postgresql://localhost:5432/gurukulams_db" );
         ds.setUser( "tom" );
         ds.setPassword( "password" );
-        ds.setDatabaseName("gurukulams_db");
-
+        ds.setCurrentSchema("gurukulams_db");
         return GurukulamsManager.getManager(ds);
     }
 }
