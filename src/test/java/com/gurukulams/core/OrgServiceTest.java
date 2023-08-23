@@ -78,14 +78,14 @@ class OrgServiceTest {
 
         final Org org = orgService.create("hari",
                 newOrg());
-        Org newOrg = newOrg();
+        org.setTitle("Updated");
         Org updatedOrg = orgService
-                .update(org.getId(), "priya", newOrg);
-        Assertions.assertEquals("HansiOrg", updatedOrg.getTitle(), "Updated");
+                .update("priya", org.getId(),  org);
+        Assertions.assertEquals("Updated", updatedOrg.getTitle(), "Update Org failed");
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             orgService
-                    .update(UUID.randomUUID().toString(), "priya", newOrg);
+                    .update(UUID.randomUUID().toString(), "priya", org);
         });
     }
 

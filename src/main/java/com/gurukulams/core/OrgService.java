@@ -58,11 +58,12 @@ public class OrgService {
     public Org update(final String userName,
                           final String id,
                           final Org org) throws SQLException {
-
-        org.setModifiedBy(userName);
-        this.orgStore.update(org);
-        return read(userName, org.getId()).get();
-
+        if (id.equals(org.getId())) {
+            org.setModifiedBy(userName);
+            this.orgStore.update(org);
+            return read(userName, org.getId()).get();
+        }
+        throw new IllegalArgumentException("Invalid Organization Id " + id);
     }
 
     /**
