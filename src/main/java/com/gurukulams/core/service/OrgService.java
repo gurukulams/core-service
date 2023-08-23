@@ -1,5 +1,6 @@
-package com.gurukulams.core;
+package com.gurukulams.core.service;
 
+import com.gurukulams.core.GurukulamsManager;
 import com.gurukulams.core.model.Org;
 import com.gurukulams.core.store.OrgStore;
 
@@ -30,7 +31,7 @@ public class OrgService {
      * @return createdOrg
      */
     public Org create(final String userName,
-                               final Org org) throws SQLException {
+                      final Org org) throws SQLException {
         org.setCreatedBy(userName);
         return this.orgStore.insert().values(org).returning();
     }

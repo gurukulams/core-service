@@ -3,8 +3,6 @@ package com.gurukulams.core.util;
 import com.gurukulams.core.GurukulamsManager;
 import org.postgresql.ds.PGSimpleDataSource;
 
-import javax.sql.DataSource;
-
 public class TestUtil {
     public static GurukulamsManager gurukulamsManager() {
         PGSimpleDataSource ds = new PGSimpleDataSource() ;

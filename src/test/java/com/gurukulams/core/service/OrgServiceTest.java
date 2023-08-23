@@ -1,4 +1,4 @@
-package com.gurukulams.core;
+package com.gurukulams.core.service;
 
 import com.gurukulams.core.model.Org;
 import com.gurukulams.core.util.TestUtil;

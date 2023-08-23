@@ -1,4 +1,4 @@
 /**
  * Basic Classes for Practicing Java.
  */
-package com.gurukulams.core;
+package com.gurukulams.core.service;

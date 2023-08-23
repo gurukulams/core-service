@@ -3,5 +3,5 @@ module my.module {
     requires java.sql;
     requires java.naming;
 
-    opens com.gurukulams.core;
+    opens com.gurukulams.core.service;
 }
