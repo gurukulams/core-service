@@ -134,7 +134,7 @@
 				<version>${jacoco.version}</version>
 				<configuration>
 					<includes>
-						<include>com/gurukulams/core/service/**</include>
+						<include>com/gurukulams/core/service/*</include>
 					</includes>
 				</configuration>
 				<executions>
