@@ -1,0 +1,18 @@
+# Connection Details
+name: "Gurukulams"
+url: "jdbc:postgresql://localhost:5432/gurukulams_db"
+userName: "tom"
+password: "password"
+schemaName: "gurukulams_db"
+
+# Mapping Logic
+rootPackage: "com.gurukulams.core"
+
+insertMap:
+  CREATED_DATE: CURRENT_TIMESTAMP
+  MODIFIED_DATE:
+  MODIFIED_BY:
+updateMap:
+  MODIFIED_DATE: CURRENT_TIMESTAMP
+  CREATED_DATE:
+  CREATED_BY:
