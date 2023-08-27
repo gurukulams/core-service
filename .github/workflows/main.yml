@@ -25,7 +25,7 @@ jobs:
           USER_NAME: ${{ secrets.GH_PACKAGE_USER }}
           ACCESS_TOKEN: ${{ secrets.GH_PACKAGE_TOKEN }}
       - name: Move the Artifacts
-        run: cp -rf target/generated-sources/gurukulams/* src/main/java && rm -rf target/generated-sources && ls target && mkdir target/generated-sources
+        run: cp -rf target/generated-sources/gurukulams/* src/main/java && rm -rf target/generated-sources && ls target && sed -i '/<!--Compiler/,/End-->/d' pom.xml
       - name: Publish to GitHub Maven Repository
         run: mvn -DskipTests -Dcheckstyle.skip deploy -s $GITHUB_WORKSPACE/settings.xml
         env:
