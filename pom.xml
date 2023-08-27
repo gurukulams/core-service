@@ -28,6 +28,14 @@
 		<maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
 	</properties>
 
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub Packages</name>
+			<url>https://maven.pkg.github.com/techatpark/gurukulams-core</url>
+		</repository>
+	</distributionManagement>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>

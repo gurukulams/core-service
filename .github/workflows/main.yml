@@ -10,6 +10,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Build the Infrastructure
+        run: docker-compose up -d
       - uses: actions/checkout@v2
       - name: Set up JDK
         uses: actions/setup-java@v1
@@ -17,10 +19,8 @@ jobs:
           java-version: 20
           server-id: github
           settings-path: ${{ github.workspace }}
-      - name: Build the Infrastructure
-        run: docker-compose up -d
       - name: Publish to GitHub Maven Repository
-        run: mvn -DskipTests -s $GITHUB_WORKSPACE/src/main/res/.m2/settings.xml deploy
+        run: mvn -DskipTests -s $GITHUB_WORKSPACE/src/main/res/.m2/settings.xml --batch-mode deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USER_NAME: ${{ secrets.GH_PACKAGE_USER }}
