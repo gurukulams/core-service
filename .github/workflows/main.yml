@@ -17,6 +17,8 @@ jobs:
           java-version: 20
           server-id: github
           settings-path: ${{ github.workspace }}
+      - name: Build the Infrastructure
+        run: docker-compose up -d
       - name: Publish to GitHub Maven Repository
         run: mvn -DskipTests -s $GITHUB_WORKSPACE/src/main/res/.m2/settings.xml deploy
         env:
