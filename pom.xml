@@ -19,12 +19,13 @@
 		<maven.compiler.compilerArgument>-Xlint:-processing</maven.compiler.compilerArgument>
 		<maven.compiler.failOnWarning>true</maven.compiler.failOnWarning>
 
-		<maven.checkstyle.version>3.1.2</maven.checkstyle.version>
+		<maven.checkstyle.version>${maven-surefire-plugin.version}</maven.checkstyle.version>
 		<checkstyle.version>10.3.2</checkstyle.version>
 		<asm.version>9.4</asm.version>
 
 		<postgresql.version>42.5.1</postgresql.version>
 		<flyway-core.version>9.21.1</flyway-core.version>
+		<maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
 	</properties>
 
 	<dependencyManagement>
@@ -96,7 +97,7 @@
 
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.1.2</version>
+				<version>${maven-surefire-plugin.version}</version>
 			</plugin>
 
 			<plugin>
