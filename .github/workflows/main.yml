@@ -10,9 +10,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Build the Infrastructure
         run: docker-compose up -d
-      - uses: actions/checkout@v2
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
