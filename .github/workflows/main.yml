@@ -20,7 +20,7 @@ jobs:
           server-id: github
           settings-path: ${{ github.workspace }}
       - name: Publish to GitHub Maven Repository
-        run: mvn -DskipTests -s $GITHUB_WORKSPACE/src/main/res/.m2/settings.xml --batch-mode deploy
+        run: mvn -DskipTests deploy -s $GITHUB_WORKSPACE/settings.xml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USER_NAME: ${{ secrets.GH_PACKAGE_USER }}
