@@ -16,7 +16,9 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
-          java-version: 20
+          java-version: '20'
+          distribution: 'temurin'
+          cache: maven
           server-id: github
           settings-path: ${{ github.workspace }}
       - name: Build
