@@ -23,9 +23,10 @@
 		<checkstyle.version>10.3.2</checkstyle.version>
 		<asm.version>9.4</asm.version>
 
-		<postgresql.version>42.5.1</postgresql.version>
+		<postgresql.version>42.5.4</postgresql.version>
 		<flyway-core.version>9.21.1</flyway-core.version>
 		<maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
+		<json.version>20230618</json.version>
 	</properties>
 
 	<distributionManagement>
@@ -55,6 +56,12 @@
 			<artifactId>postgresql</artifactId>
 			<version>${postgresql.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>${json.version}</version>
+		</dependency>
+
 
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
