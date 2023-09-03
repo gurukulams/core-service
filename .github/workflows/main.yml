@@ -29,6 +29,6 @@ jobs:
       - name: Move the Artifacts
         run: cp -rf target/generated-sources/gurukulams/* src/main/java && rm -rf target/generated-sources && ls target && sed -i '/<!--Compiler/,/End-->/d' pom.xml
       - name: Publish to GitHub Maven Repository
-        run: mvn -DskipTests -Dcheckstyle.skip deploy -s $GITHUB_WORKSPACE/settings.xml
+        run: ./mvnw -DskipTests -Dcheckstyle.skip deploy -s $GITHUB_WORKSPACE/settings.xml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
