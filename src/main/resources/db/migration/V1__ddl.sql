@@ -12,7 +12,7 @@ CREATE TABLE learner (
     email VARCHAR(200) NOT NULL,
     image_url VARCHAR(200) NOT NULL,
     provider VARCHAR(50) DEFAULT 'local' NOT NULL,
-    password VARCHAR(200),
+    pword VARCHAR(200),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT learner_email_constraint UNIQUE (email),
