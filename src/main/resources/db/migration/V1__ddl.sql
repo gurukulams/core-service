@@ -22,8 +22,7 @@ CREATE TABLE learner (
 
 CREATE TABLE learner_profile (
     user_handle VARCHAR(200) PRIMARY KEY,
-    first_name VARCHAR(200) NOT NULL,
-    last_name VARCHAR(200) NOT NULL,
+    name VARCHAR(200) NOT NULL,
     dob DATE NOT NULL,
     FOREIGN KEY (user_handle) REFERENCES handle (user_handle)
 );
