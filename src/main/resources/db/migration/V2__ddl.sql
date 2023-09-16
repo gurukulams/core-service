@@ -221,9 +221,7 @@ CREATE TABLE events (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by VARCHAR(55) NOT NULL,
     modified_at TIMESTAMP,
-    modified_by VARCHAR(200),
-    CONSTRAINT event_title_constraint UNIQUE (title)
-    --add date field
+    modified_by VARCHAR(200)
 );
 
 
