@@ -1,5 +1,6 @@
 package com.gurukulams.core.service;
 
+
 import com.gurukulams.core.model.Org;
 import com.gurukulams.core.util.TestUtil;
 import org.junit.jupiter.api.AfterEach;
@@ -47,7 +48,7 @@ class OrgServiceTest {
     void create() throws SQLException {
         final Org org = orgService.create("hari"
                 , newOrg());
-        Assertions.assertTrue(orgService.read("hari", org.getId()).isPresent(), "Created org");
+        Assertions.assertTrue(orgService.read("hari", org.getUserHandle()).isPresent(), "Created org");
     }
 
 
@@ -58,7 +59,7 @@ class OrgServiceTest {
     void read() throws SQLException {
         final Org org = orgService.create("hari",
                 newOrg());
-        Assertions.assertTrue(orgService.read("hari", org.getId()).isPresent(),
+        Assertions.assertTrue(orgService.read("hari", org.getUserHandle()).isPresent(),
                 "Created org");
     }
 
@@ -69,7 +70,7 @@ class OrgServiceTest {
                 newOrg());
         org.setTitle("Updated");
         Org updatedOrg = orgService
-                .update("priya", org.getId(),  org);
+                .update("priya", org.getUserHandle(),  org);
         Assertions.assertEquals("Updated", updatedOrg.getTitle(), "Update Org failed");
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
@@ -84,8 +85,8 @@ class OrgServiceTest {
 
         final Org org = orgService.create("hari",
                 newOrg());
-        orgService.delete("mani", org.getId());
-        Assertions.assertFalse(orgService.read("mani", org.getId()).isPresent(), "Deleted org");
+        orgService.delete("mani", org.getUserHandle());
+        Assertions.assertFalse(orgService.read("mani", org.getUserHandle()).isPresent(), "Deleted org");
     }
 
     @Test
@@ -108,8 +109,8 @@ class OrgServiceTest {
      */
     Org newOrg() {
         Org org = new Org();
-        org.setId(UUID.randomUUID().toString());
-        org.setTitle("Hariorg" + org.getId());
+        org.setUserHandle(UUID.randomUUID().toString());
+        org.setTitle("Hariorg" + org.getUserHandle());
         return org;
     }
 
