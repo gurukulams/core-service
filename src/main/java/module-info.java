@@ -8,4 +8,6 @@ module my.module {
 
     opens com.gurukulams.core.service;
     opens com.gurukulams.core.payload;
+
+
 }
