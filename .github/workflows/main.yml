@@ -22,7 +22,9 @@ jobs:
           server-id: github
           settings-path: ${{ github.workspace }}
       - name: Build
-        run: ./mvnw --quiet -DskipTests -s $GITHUB_WORKSPACE/src/main/res/.m2/settings.xml package
+        run: |
+          ./mvnw --quiet -s $GITHUB_WORKSPACE/src/main/res/.m2/settings.xml -B clean package -DskipTests --file pom.xml
+          ./mvnw --quiet -s $GITHUB_WORKSPACE/src/main/res/.m2/settings.xml -B exec:java --file pom.xml
         env:
           USER_NAME: ${{ secrets.GH_PACKAGE_USER }}
           ACCESS_TOKEN: ${{ secrets.GH_PACKAGE_TOKEN }}
