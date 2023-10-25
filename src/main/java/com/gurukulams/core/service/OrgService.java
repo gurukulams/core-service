@@ -70,7 +70,7 @@ public class OrgService {
                           final Org org) throws SQLException {
         if (userHandle.equals(org.getUserHandle())) {
             org.setModifiedBy(userName);
-            this.orgStore.update(org);
+            this.orgStore.update().set(org).execute();
             return read(userName, org.getUserHandle()).get();
         }
         throw new IllegalArgumentException("Invalid Organization Id "

@@ -142,7 +142,8 @@ public class LearnerService {
         learnerModel.setEmail(learner.email());
         learnerModel.setPword(learner.password());
         learnerModel.setImageUrl(learner.imageUrl());
-        final int updatedRows = learnerStore.update(learnerModel);
+        final int updatedRows = learnerStore.update()
+                .set(learnerModel).execute();
         if (updatedRows == 0) {
             throw new IllegalArgumentException("Learner not found");
         }

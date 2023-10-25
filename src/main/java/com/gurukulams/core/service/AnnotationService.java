@@ -123,12 +123,12 @@ public class AnnotationService {
         if (id.equals(annotation.getId())) {
             if (locale == null) {
                 this.annotationsStore.update()
-                    .set(AnnotationStore.value(annotation.getValue()))
+                    .set(AnnotationStore.note(annotation.getNote()))
                     .where(AnnotationStore.locale().isNull())
                     .execute();
             } else {
                 this.annotationsStore.update()
-                        .set(AnnotationStore.value(annotation.getValue()))
+                        .set(AnnotationStore.note(annotation.getNote()))
                     .where(AnnotationStore.locale().eq(locale.getLanguage()))
                     .execute();
             }
