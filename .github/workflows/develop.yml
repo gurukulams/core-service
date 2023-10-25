@@ -23,7 +23,7 @@ jobs:
       run: docker-compose up -d
     - name: Prepare Code
       run: |
-        mvn -s $GITHUB_WORKSPACE/src/main/res/.m2/settings.xml -B clean install -DskipTests --file pom.xml
+        ./mvnw -s $GITHUB_WORKSPACE/src/main/res/.m2/settings.xml -B clean install -DskipTests --file pom.xml
         mvn -s $GITHUB_WORKSPACE/src/main/res/.m2/settings.xml -B exec:java --file pom.xml
     - name: Quality Check
       run: mvn --quiet -s $GITHUB_WORKSPACE/src/main/res/.m2/settings.xml -B jacoco:prepare-agent install jacoco:report --file pom.xml
