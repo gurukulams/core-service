@@ -36,9 +36,4 @@ public class TestUtil {
         return ds;
     }
 
-    private static JSONObject getJson(final ResultSet rs, final int index) throws SQLException {
-        String jsonText = rs.getString(index);
-        return jsonText == null ? null : new JSONObject(jsonText.substring(1,
-                jsonText.length() - 1).replace("\\", ""));
-    }
 }
