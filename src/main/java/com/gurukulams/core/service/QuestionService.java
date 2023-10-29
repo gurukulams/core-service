@@ -482,21 +482,24 @@ public class QuestionService {
                 if (!availableIds.isEmpty()) {
 
                     final String deleteLocallizedChoiceSQL =
-                            "DELETE FROM question_choice_localized WHERE choice_id IN (SELECT id FROM question_choice "
-                                    + "WHERE question_id = ? AND id NOT IN ("
-                                    + availableIds.stream()
-                                    .map(aId -> "?")
-                                    .collect(Collectors.joining(","))
-                                    + "))";
+                    "DELETE FROM question_choice_localized WHERE"
+                            + " choice_id IN (SELECT id FROM question_choice "
+                            + "WHERE question_id = ? AND id NOT IN ("
+                            + availableIds.stream()
+                            .map(aId -> "?")
+                            .collect(Collectors.joining(","))
+                            + "))";
                     availableIds.add(0, id);
 
-                    QuestionChoiceLocalizedStore.DeleteStatement.DeleteQuery deleteChoiceLocalizedQuery
+                    QuestionChoiceLocalizedStore.DeleteStatement.DeleteQuery
+                            deleteChoiceLocalizedQuery
                             = this.questionChoiceLocalizedStore
                             .delete()
                             .sql(deleteLocallizedChoiceSQL);
 
                     for (UUID cId: availableIds) {
-                        deleteChoiceLocalizedQuery.param(QuestionChoiceStore.id(cId));
+                        deleteChoiceLocalizedQuery
+                                .param(QuestionChoiceStore.id(cId));
                     }
 
                     deleteChoiceLocalizedQuery
@@ -511,7 +514,8 @@ public class QuestionService {
                                     + ")";
                     availableIds.add(0, id);
 
-                    QuestionChoiceStore.DeleteStatement.DeleteQuery deleteChoiceQuery
+                    QuestionChoiceStore.DeleteStatement.DeleteQuery
+                            deleteChoiceQuery
                             = this.questionChoiceStore
                             .delete()
                             .sql(deleteChoiceSQL);
