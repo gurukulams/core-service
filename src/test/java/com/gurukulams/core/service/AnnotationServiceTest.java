@@ -1,7 +1,6 @@
 package com.gurukulams.core.service;
 
 import com.gurukulams.core.model.Annotation;
-import com.gurukulams.core.util.TestUtil;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -17,10 +16,11 @@ import java.util.UUID;
 
 class AnnotationServiceTest {
 
+    public static final String USER_NAME = "mani";
     private final AnnotationService annotationService;
 
     AnnotationServiceTest() {
-        this.annotationService = new AnnotationService(TestUtil.gurukulamsManager());
+        this.annotationService = new AnnotationService();
     }
 
     /**
@@ -42,18 +42,15 @@ class AnnotationServiceTest {
     }
 
     private void cleanUp() throws SQLException {
-        annotationService.delete();
+        annotationService.delete(USER_NAME);
     }
 
     @Test
     void create() throws SQLException {
         final Annotation annotation = annotationService.create(
-                "mani",
-                "mani",
-                anAnnotation(),
-                null,
-                "mani");
-        Assertions.assertTrue(annotationService.read(annotation.getId(),
+                USER_NAME, USER_NAME, anAnnotation(), null, USER_NAME
+        );
+        Assertions.assertTrue(annotationService.read(USER_NAME,annotation.getId(),
                         null).isPresent(),
                 "Created Annotation");
     }
@@ -61,16 +58,13 @@ class AnnotationServiceTest {
     @Test
     void read() throws SQLException {
         final Annotation annotation = annotationService.create(
-                "mani",
-                "mani",
-                anAnnotation(),
-                null,
-                "mani");
+                USER_NAME, USER_NAME, anAnnotation(), null, USER_NAME
+        );
         final UUID newAnnotationId = annotation.getId();
-        Assertions.assertTrue(annotationService.read(newAnnotationId, null).isPresent(),
+        Assertions.assertTrue(annotationService.read(USER_NAME,newAnnotationId, null).isPresent(),
                 "Annotation Created");
 
-        Assertions.assertTrue(annotationService.read(newAnnotationId,
+        Assertions.assertTrue(annotationService.read(USER_NAME,newAnnotationId,
                         Locale.GERMAN).isEmpty(),
                 "Annotation Unavailable for Locale");
     }
@@ -78,16 +72,13 @@ class AnnotationServiceTest {
     @Test
     void readLocalized() throws SQLException {
         final Annotation annotation = annotationService.create(
-                "mani",
-                "mani",
-                anAnnotation(),
-                Locale.GERMAN,
-                "mani");
+                USER_NAME, USER_NAME, anAnnotation(), Locale.GERMAN, USER_NAME
+        );
         final UUID newAnnotationId = annotation.getId();
-        Assertions.assertTrue(annotationService.read(newAnnotationId, null).isEmpty(),
+        Assertions.assertTrue(annotationService.read(USER_NAME,newAnnotationId, null).isEmpty(),
                 "Annotation Unavailable for English");
 
-        Assertions.assertTrue(annotationService.read(newAnnotationId,
+        Assertions.assertTrue(annotationService.read(USER_NAME,newAnnotationId,
                         Locale.GERMAN).isPresent(),
                 "Annotation Available for Locale");
     }
@@ -102,24 +93,18 @@ class AnnotationServiceTest {
 
     void testList(Locale locale) throws SQLException {
         annotationService.create(
-                "mani",
-                "mani",
-                anAnnotation(),
-                locale,
-                "mani");
+                USER_NAME, USER_NAME, anAnnotation(), locale, USER_NAME
+        );
         Annotation newAnnotation = new Annotation();
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("a", "a");
         jsonObject.put("b", "b2");
         newAnnotation.setNote(jsonObject);
-        annotationService.create("mani",
-                "mani",
-                newAnnotation,
-                locale,
-                "mani");
-        List<Annotation> listofannotation = annotationService.list("mani",
-                locale, "mani",
-                "mani"
+        annotationService.create(USER_NAME, USER_NAME, newAnnotation, locale, USER_NAME
+        );
+        List<Annotation> listofannotation = annotationService.list(USER_NAME,
+                locale, USER_NAME,
+                USER_NAME
         );
         Assertions.assertEquals(2, listofannotation.size());
     }
@@ -131,11 +116,8 @@ class AnnotationServiceTest {
 
     void testUpdate(Locale locale) throws SQLException {
         final Annotation annotation = annotationService.create(
-                "mani",
-                "mani",
-                anAnnotation(),
-                locale,
-                "mani");
+                USER_NAME, USER_NAME, anAnnotation(), locale, USER_NAME
+        );
         final UUID newAnnotationId = annotation.getId();
 
         Annotation newAnnotation = new Annotation();
@@ -148,13 +130,13 @@ class AnnotationServiceTest {
         newAnnotation.setNote(jsonObject);
 
         Optional<Annotation> updatedAnnotation = annotationService
-                .update(newAnnotationId, locale, newAnnotation);
+                .update(USER_NAME, newAnnotationId, locale, newAnnotation);
         Assertions.assertEquals("b2", updatedAnnotation.get()
                 .getNote().get("b"), "Updated");
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             annotationService
-                    .update(UUID.randomUUID(), locale, newAnnotation);
+                    .update(USER_NAME, UUID.randomUUID(), locale, newAnnotation);
         });
     }
     @Test
@@ -165,13 +147,10 @@ class AnnotationServiceTest {
 
     void testDelete(Locale locale) throws SQLException {
         final Annotation annotation = annotationService.create(
-                "mani",
-                "mani",
-                anAnnotation(),
-                locale,
-                "mani");
-        annotationService.delete(annotation.getId(), locale);
-        Assertions.assertFalse(annotationService.read(annotation.getId(), locale).isPresent(),
+                USER_NAME, USER_NAME, anAnnotation(), locale, USER_NAME
+        );
+        annotationService.delete(USER_NAME, annotation.getId(), locale);
+        Assertions.assertFalse(annotationService.read(USER_NAME,annotation.getId(), locale).isPresent(),
                 "Deleted Annotation");
     }
 

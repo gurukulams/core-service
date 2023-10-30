@@ -1,10 +1,16 @@
 package com.gurukulams.core.service;
 
+import org.h2.jdbcx.JdbcDataSource;
 
 import com.gurukulams.core.GurukulamsManager;
 import com.gurukulams.core.model.Annotation;
 import com.gurukulams.core.store.AnnotationStore;
+import org.h2.tools.RunScript;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
@@ -15,38 +21,21 @@ import java.util.UUID;
  * The type User Annotation service.
  */
 public class AnnotationService {
-
-    /**
-     * this helps to execute sql queries.
-     */
-    private final AnnotationStore annotationsStore;
-
-    /**
-     * initializes.
-     *
-     * @param gurukulamsManager
-     */
-    public AnnotationService(final GurukulamsManager gurukulamsManager) {
-        this.annotationsStore = gurukulamsManager.getAnnotationStore();
-    }
-
-
-
     /**
      * Create optional.
      *
      * @param userName   user name
-     * @param annotation the  annotation
-     * @param onType
      * @param onInstance
+     * @param annotation the  annotation
      * @param locale     tha language
+     * @param onType
      * @return the optional
      */
-    public final Annotation create(final String onType,
-                                    final String onInstance,
-                                    final Annotation annotation,
-                                    final Locale locale,
-                                    final String userName) throws SQLException {
+    public final Annotation create(final String userName,
+                                   final String onInstance,
+                                   final Annotation annotation,
+                                   final Locale locale,
+                                   final String onType) throws SQLException {
         annotation.setId(UUID.randomUUID());
         annotation.setOnType(onType);
         annotation.setOnInstance(onInstance);
@@ -54,7 +43,7 @@ public class AnnotationService {
         if (locale != null) {
             annotation.setLocale(locale.getLanguage());
         }
-        return this.annotationsStore
+        return this.getAnnotationStore(userName)
                 .insert()
                 .values(annotation).returning();
     }
@@ -62,19 +51,20 @@ public class AnnotationService {
 
     /**
      * Read optional.
-     *
+     * @param userName
      * @param id     the id
      * @param locale tha language
      * @return the optional
      */
-    public final Optional<Annotation> read(final UUID id,
+    public final Optional<Annotation> read(final String userName,
+                                           final UUID id,
                         final Locale locale) throws SQLException {
 
         if (locale == null) {
-            return this.annotationsStore.select(id, AnnotationStore
+            return this.getAnnotationStore(userName).select(id, AnnotationStore
                     .locale().isNull());
         } else {
-            return this.annotationsStore.select(id, AnnotationStore
+            return this.getAnnotationStore(userName).select(id, AnnotationStore
                     .locale().eq(locale.getLanguage()));
         }
     }
@@ -94,13 +84,13 @@ public class AnnotationService {
                                         final String onInstance)
             throws SQLException {
         if (locale == null) {
-            return this.annotationsStore
+            return this.getAnnotationStore(userName)
                     .select(AnnotationStore.onType().eq(onType)
                             .and().locale().isNull()
                             .and().onInstance().eq(onInstance)
                             .and().createdBy().eq(userName)).execute();
         } else {
-            return this.annotationsStore
+            return this.getAnnotationStore(userName)
                     .select(AnnotationStore.onType().eq(onType)
                             .and().locale().eq(locale.getLanguage())
                             .and().onInstance().eq(onInstance)
@@ -110,29 +100,30 @@ public class AnnotationService {
 
     /**
      * Update Annotation optional.
-     *
+     * @param userName
      * @param id         the id
      * @param annotation the user Annotation
      * @param locale     tha language
      * @return the optional
      */
-    public final Optional<Annotation> update(final UUID id,
+    public final Optional<Annotation> update(final String userName,
+                         final UUID id,
                           final Locale locale,
                           final Annotation annotation) throws SQLException {
 
         if (id.equals(annotation.getId())) {
             if (locale == null) {
-                this.annotationsStore.update()
+                this.getAnnotationStore(userName).update()
                     .set(AnnotationStore.note(annotation.getNote()))
                     .where(AnnotationStore.locale().isNull())
                     .execute();
             } else {
-                this.annotationsStore.update()
+                this.getAnnotationStore(userName).update()
                         .set(AnnotationStore.note(annotation.getNote()))
                     .where(AnnotationStore.locale().eq(locale.getLanguage()))
                     .execute();
             }
-            return read(id, locale);
+            return read(userName, id, locale);
         } else {
             throw new IllegalArgumentException("Ids do not match");
         }
@@ -140,19 +131,21 @@ public class AnnotationService {
 
     /**
      * Delete boolean.
-     *
+     * @param userName
      * @param id     the id
      * @param locale tha language
      * @return the boolean
      */
-    public final boolean delete(final UUID id, final Locale locale)
+    public final boolean delete(final String userName,
+                                final UUID id,
+                                final Locale locale)
             throws SQLException {
         if (locale == null) {
-            return this.annotationsStore.delete(
+            return this.getAnnotationStore(userName).delete(
                     AnnotationStore.id().eq(id)
                             .and().locale().isNull()).execute() == 1;
         }
-        return this.annotationsStore.delete(
+        return this.getAnnotationStore(userName).delete(
                 AnnotationStore.id().eq(id)
                         .and().locale()
                         .eq(locale.getLanguage())).execute() == 1;
@@ -160,9 +153,34 @@ public class AnnotationService {
 
     /**
      * Deletes all Annotations.
+     * @param userName
      */
-    public void delete() throws SQLException {
-        this.annotationsStore.delete().execute();
+    public void delete(final String userName) throws SQLException {
+        this.getAnnotationStore(userName).delete().execute();
     }
 
+    /**
+     * Get Annotation Store for User.
+     * @param userName
+     * @return getAnnotationService(userName)
+     */
+    public AnnotationStore getAnnotationStore(final String userName)
+            throws SQLException {
+        String dbFile = "./data/user/" + userName;
+        JdbcDataSource ds = new JdbcDataSource();
+        ds.setURL("jdbc:h2:" + dbFile);
+        ds.setUser("sa");
+        ds.setPassword("sa");
+        if (!new File(dbFile + ".mv.db").exists()) {
+            try {
+                Reader reader = new InputStreamReader(AnnotationService.class
+                        .getModule()
+                        .getResourceAsStream("db/migration/V2__notes.sql"));
+                RunScript.execute(ds.getConnection(), reader);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return GurukulamsManager.getManager(ds).getAnnotationStore();
+    }
 }

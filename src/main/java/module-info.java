@@ -6,6 +6,7 @@ module my.module {
     requires org.postgresql.jdbc;
     requires jakarta.validation;
     requires org.hibernate.validator;
+    requires com.h2database;
 
     opens com.gurukulams.core.service;
     opens com.gurukulams.core.payload;
