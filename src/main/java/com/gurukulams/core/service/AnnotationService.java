@@ -35,7 +35,8 @@ public class AnnotationService {
                                    final String onInstance,
                                    final Annotation annotation,
                                    final Locale locale,
-                                   final String onType) throws SQLException {
+                                   final String onType)
+            throws SQLException, IOException {
         annotation.setId(UUID.randomUUID());
         annotation.setOnType(onType);
         annotation.setOnInstance(onInstance);
@@ -58,7 +59,8 @@ public class AnnotationService {
      */
     public final Optional<Annotation> read(final String userName,
                                            final UUID id,
-                        final Locale locale) throws SQLException {
+                        final Locale locale)
+            throws SQLException, IOException {
 
         if (locale == null) {
             return this.getAnnotationStore(userName).select(id, AnnotationStore
@@ -82,7 +84,7 @@ public class AnnotationService {
                                         final Locale locale,
                                         final String onType,
                                         final String onInstance)
-            throws SQLException {
+            throws SQLException, IOException {
         if (locale == null) {
             return this.getAnnotationStore(userName)
                     .select(AnnotationStore.onType().eq(onType)
@@ -109,7 +111,8 @@ public class AnnotationService {
     public final Optional<Annotation> update(final String userName,
                          final UUID id,
                           final Locale locale,
-                          final Annotation annotation) throws SQLException {
+                          final Annotation annotation)
+            throws SQLException, IOException {
 
         if (id.equals(annotation.getId())) {
             if (locale == null) {
@@ -139,7 +142,7 @@ public class AnnotationService {
     public final boolean delete(final String userName,
                                 final UUID id,
                                 final Locale locale)
-            throws SQLException {
+            throws SQLException, IOException {
         if (locale == null) {
             return this.getAnnotationStore(userName).delete(
                     AnnotationStore.id().eq(id)
@@ -155,7 +158,8 @@ public class AnnotationService {
      * Deletes all Annotations.
      * @param userName
      */
-    public void delete(final String userName) throws SQLException {
+    public void delete(final String userName)
+            throws SQLException, IOException {
         this.getAnnotationStore(userName).delete().execute();
     }
 
@@ -165,21 +169,19 @@ public class AnnotationService {
      * @return getAnnotationService(userName)
      */
     public AnnotationStore getAnnotationStore(final String userName)
-            throws SQLException {
+            throws SQLException, IOException {
         String dbFile = "./data/user/" + userName;
         JdbcDataSource ds = new JdbcDataSource();
         ds.setURL("jdbc:h2:" + dbFile);
         ds.setUser("sa");
         ds.setPassword("sa");
         if (!new File(dbFile + ".mv.db").exists()) {
-            try {
-                Reader reader = new InputStreamReader(AnnotationService.class
-                        .getModule()
-                        .getResourceAsStream("db/migration/V2__notes.sql"));
-                RunScript.execute(ds.getConnection(), reader);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+
+            Reader reader = new InputStreamReader(AnnotationService.class
+                    .getModule()
+                    .getResourceAsStream("db/migration/V2__notes.sql"));
+            RunScript.execute(ds.getConnection(), reader);
+
         }
         return GurukulamsManager.getManager(ds).getAnnotationStore();
     }
