@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
@@ -29,7 +30,7 @@ class AnnotationServiceTest {
      * @throws SQLException the io exception
      */
     @BeforeEach
-    void before() throws SQLException {
+    void before() throws SQLException, IOException {
         cleanUp();
     }
 
@@ -37,16 +38,16 @@ class AnnotationServiceTest {
      * After.
      */
     @AfterEach
-    void after() throws SQLException {
+    void after() throws SQLException, IOException {
         cleanUp();
     }
 
-    private void cleanUp() throws SQLException {
+    private void cleanUp() throws SQLException, IOException {
         annotationService.delete(USER_NAME);
     }
 
     @Test
-    void create() throws SQLException {
+    void create() throws SQLException, IOException {
         final Annotation annotation = annotationService.create(
                 USER_NAME, USER_NAME, anAnnotation(), null, USER_NAME
         );
@@ -56,7 +57,7 @@ class AnnotationServiceTest {
     }
 
     @Test
-    void read() throws SQLException {
+    void read() throws SQLException, IOException {
         final Annotation annotation = annotationService.create(
                 USER_NAME, USER_NAME, anAnnotation(), null, USER_NAME
         );
@@ -70,7 +71,7 @@ class AnnotationServiceTest {
     }
 
     @Test
-    void readLocalized() throws SQLException {
+    void readLocalized() throws SQLException, IOException {
         final Annotation annotation = annotationService.create(
                 USER_NAME, USER_NAME, anAnnotation(), Locale.GERMAN, USER_NAME
         );
@@ -84,14 +85,14 @@ class AnnotationServiceTest {
     }
 
     @Test
-    void list() throws SQLException {
+    void list() throws SQLException, IOException {
 
         testList(null);
         testList(Locale.GERMAN);
 
     }
 
-    void testList(Locale locale) throws SQLException {
+    void testList(Locale locale) throws SQLException, IOException {
         annotationService.create(
                 USER_NAME, USER_NAME, anAnnotation(), locale, USER_NAME
         );
@@ -109,12 +110,12 @@ class AnnotationServiceTest {
         Assertions.assertEquals(2, listofannotation.size());
     }
     @Test
-    void update() throws SQLException {
+    void update() throws SQLException, IOException {
         testUpdate(null);
         testUpdate(Locale.GERMAN);
     }
 
-    void testUpdate(Locale locale) throws SQLException {
+    void testUpdate(Locale locale) throws SQLException, IOException {
         final Annotation annotation = annotationService.create(
                 USER_NAME, USER_NAME, anAnnotation(), locale, USER_NAME
         );
@@ -140,12 +141,12 @@ class AnnotationServiceTest {
         });
     }
     @Test
-    void delete() throws SQLException {
+    void delete() throws SQLException, IOException {
         testDelete(null);
         testDelete(Locale.GERMAN);
     }
 
-    void testDelete(Locale locale) throws SQLException {
+    void testDelete(Locale locale) throws SQLException, IOException {
         final Annotation annotation = annotationService.create(
                 USER_NAME, USER_NAME, anAnnotation(), locale, USER_NAME
         );
