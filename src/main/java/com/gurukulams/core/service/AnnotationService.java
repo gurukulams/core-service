@@ -40,7 +40,6 @@ public class AnnotationService {
         annotation.setId(UUID.randomUUID());
         annotation.setOnType(onType);
         annotation.setOnInstance(onInstance);
-        annotation.setCreatedBy(userName);
         if (locale != null) {
             annotation.setLocale(locale.getLanguage());
         }
@@ -89,14 +88,12 @@ public class AnnotationService {
             return this.getAnnotationStore(userName)
                     .select(AnnotationStore.onType().eq(onType)
                             .and().locale().isNull()
-                            .and().onInstance().eq(onInstance)
-                            .and().createdBy().eq(userName)).execute();
+                            .and().onInstance().eq(onInstance)).execute();
         } else {
             return this.getAnnotationStore(userName)
                     .select(AnnotationStore.onType().eq(onType)
                             .and().locale().eq(locale.getLanguage())
-                            .and().onInstance().eq(onInstance)
-                            .and().createdBy().eq(userName)).execute();
+                            .and().onInstance().eq(onInstance)).execute();
         }
     }
 

@@ -3,6 +3,5 @@ CREATE TABLE annotation (
    on_type VARCHAR NOT NULL,
    on_instance VARCHAR NOT NULL,
    locale VARCHAR(8),
-   note JSON NOT NULL,
-   created_by VARCHAR(55) NOT NULL
+   note JSON NOT NULL
 );
