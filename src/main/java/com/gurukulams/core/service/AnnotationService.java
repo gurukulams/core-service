@@ -21,6 +21,16 @@ import java.util.UUID;
  * The type User Annotation service.
  */
 public class AnnotationService {
+
+    /**
+     * Notebooks Data Storage Directory.
+     */
+    private static final String DATA_NOTEBOOK = "./data/notebooks/";
+    /**
+     * File Extension of H2.
+     */
+    private static final String H2_DB_EXT = ".mv.db";
+
     /**
      * Create optional.
      *
@@ -60,12 +70,13 @@ public class AnnotationService {
                                            final UUID id,
                         final Locale locale)
             throws SQLException, IOException {
-
         if (locale == null) {
-            return this.getAnnotationStore(userName).select(id, AnnotationStore
+            return this.getAnnotationStore(userName)
+                    .select(id, AnnotationStore
                     .locale().isNull());
         } else {
-            return this.getAnnotationStore(userName).select(id, AnnotationStore
+            return this.getAnnotationStore(userName)
+                    .select(id, AnnotationStore
                     .locale().eq(locale.getLanguage()));
         }
     }
@@ -165,20 +176,18 @@ public class AnnotationService {
      * @param userName
      * @return getAnnotationService(userName)
      */
-    public AnnotationStore getAnnotationStore(final String userName)
+    private AnnotationStore getAnnotationStore(final String userName)
             throws SQLException, IOException {
-        String dbFile = "./data/user/" + userName;
+        String dbFile = DATA_NOTEBOOK + userName;
         JdbcDataSource ds = new JdbcDataSource();
         ds.setURL("jdbc:h2:" + dbFile);
         ds.setUser("sa");
         ds.setPassword("sa");
-        if (!new File(dbFile + ".mv.db").exists()) {
-
+        if (!new File(dbFile + H2_DB_EXT).exists()) {
             Reader reader = new InputStreamReader(AnnotationService.class
                     .getModule()
                     .getResourceAsStream("db/migration/V2__notes.sql"));
             RunScript.execute(ds.getConnection(), reader);
-
         }
         return GurukulamsManager.getManager(ds).getAnnotationStore();
     }
