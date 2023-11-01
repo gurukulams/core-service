@@ -135,8 +135,6 @@
 
 	<build>
 		<plugins>
-
-			<!--Compiler Start-->
 			<plugin>
 				<groupId>org.sqlcomponents</groupId>
 				<artifactId>maven-plugin</artifactId>
@@ -163,7 +161,6 @@
 					</dependency>
 				</dependencies>
 			</plugin>
-			<!--Compiler End-->
 
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
@@ -261,20 +258,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>${exec-maven-plugin.version}</version>
-				<configuration>
-					<includePluginDependencies>true</includePluginDependencies>
-					<mainClass>com.gurukulams.core.util.CodeGen</mainClass>
-					<classpathScope>test</classpathScope>
-				</configuration>
-			</plugin>
-
-
-
 		</plugins>
 	</build>
 

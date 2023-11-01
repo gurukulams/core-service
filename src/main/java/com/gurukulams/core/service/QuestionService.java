@@ -23,7 +23,6 @@ import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
 
 import java.lang.annotation.ElementType;
 import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -819,7 +818,7 @@ public class QuestionService {
                     .insert()
                     .values(questionCategory)
                     .execute();
-        } catch (final SQLIntegrityConstraintViolationException e) {
+        } catch (final SQLException e) {
             // Retry with Auto Create Category
 
             Category category = new Category();
