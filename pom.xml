@@ -27,7 +27,6 @@
 		<flyway-core.version>9.21.1</flyway-core.version>
 		<maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
 		<exec-maven-plugin.version>3.1.0</exec-maven-plugin.version>
-		<json.version>20230618</json.version>
 	</properties>
 
 	<distributionManagement>
@@ -110,12 +109,6 @@
 			<scope>test</scope>
 		</dependency>
 
-
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>${json.version}</version>
-		</dependency>
 
 
 		<dependency>
