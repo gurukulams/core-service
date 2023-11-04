@@ -1,7 +1,9 @@
 package com.gurukulams.core.service;
 
 import com.gurukulams.core.model.LearnerProfile;
+import com.gurukulams.core.payload.RegistrationRequest;
 import com.gurukulams.core.util.TestUtil;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
@@ -40,33 +42,44 @@ class LearnerProfileServiceTest {
     private void cleanUp() throws SQLException {
         learnerProfileService.delete();
         learnerService.delete();
+        learnerService.signUp(LearnerServiceTest.aSignupRequest(),
+                s -> String.valueOf(new StringBuilder(s).reverse()));
     }
 
     LearnerProfileServiceTest() {
-        this.learnerProfileService = new LearnerProfileService(TestUtil.gurukulamsManager());
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
-
         Validator validator = validatorFactory.getValidator();
+        this.learnerProfileService = new LearnerProfileService(TestUtil.gurukulamsManager(), validator);
         this.learnerService = new LearnerService(TestUtil.gurukulamsManager(), validator);
     }
 
     @Test
+    void testInvalidCreate() {
+        RegistrationRequest registrationRequest = new RegistrationRequest();
+        registrationRequest.setDob(LocalDate.now().plusYears(20L));
+        registrationRequest.setName("Hello");
+
+        Assertions.assertThrows(ConstraintViolationException.class, () -> {
+            learnerProfileService.create(learnerService
+                            .readByEmail(LearnerServiceTest.aSignupRequest().getEmail())
+                            .get().userHandle(),
+                    registrationRequest);
+        });
+    }
+
+    @Test
     void create() throws SQLException {
-        final LearnerProfile org = learnerProfileService.create(newLearnerProfile());
+        final LearnerProfile org = learnerProfileService.create(learnerService
+                        .readByEmail(LearnerServiceTest.aSignupRequest().getEmail())
+                        .get().userHandle(),
+                newRegistrationRequest());
         Assertions.assertTrue(learnerProfileService.read(org.getUserHandle()).isPresent(), "Created org");
     }
 
-    private LearnerProfile newLearnerProfile() throws SQLException {
-
-        learnerService.signUp(LearnerServiceTest.aSignupRequest(),
-                s -> String.valueOf(new StringBuilder(s).reverse()));
-
-
-
-        LearnerProfile learnerProfile = new LearnerProfile();
-        learnerProfile.setDob(LocalDate.now().minusYears(20L));
-        learnerProfile.setName("Hello");
-        learnerProfile.setUserHandle(learnerService.readByEmail(LearnerServiceTest.aSignupRequest().getEmail()).get().userHandle());
-        return learnerProfile;
+    private RegistrationRequest newRegistrationRequest() {
+        RegistrationRequest newRegistrationRequest = new RegistrationRequest();
+        newRegistrationRequest.setDob(LocalDate.now().minusYears(20L));
+        newRegistrationRequest.setName("Hello");
+        return newRegistrationRequest;
     }
 }
