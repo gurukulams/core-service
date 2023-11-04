@@ -34,3 +34,41 @@ CREATE TABLE org (
     FOREIGN KEY (user_handle) REFERENCES handle (user_handle),
     CONSTRAINT org_title_constraint UNIQUE (title)
 );
+
+CREATE TABLE category (
+    id VARCHAR(50) PRIMARY KEY,
+    title VARCHAR(200),
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(55) NOT NULL,
+    modified_at TIMESTAMP,
+    modified_by VARCHAR(200)
+);
+
+CREATE TABLE category_localized (
+    category_id VARCHAR(50),
+    locale VARCHAR(8) NOT NULL,
+    title VARCHAR(200),
+    description TEXT,
+    FOREIGN KEY (category_id) REFERENCES category (id),
+    PRIMARY KEY(category_id, locale)
+);
+
+CREATE TABLE tag (
+    id VARCHAR(50) PRIMARY KEY,
+    title VARCHAR(200),
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(55) NOT NULL,
+    modified_at TIMESTAMP,
+    modified_by VARCHAR(200)
+);
+
+CREATE TABLE tag_localized (
+    tag_id VARCHAR(50),
+    locale VARCHAR(8) NOT NULL,
+    title VARCHAR(200),
+    description TEXT,
+    FOREIGN KEY (tag_id) REFERENCES tag (id),
+    PRIMARY KEY(tag_id, locale)
+);

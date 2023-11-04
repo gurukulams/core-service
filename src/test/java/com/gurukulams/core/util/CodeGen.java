@@ -2,6 +2,7 @@ package com.gurukulams.core.util;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
@@ -10,12 +11,15 @@ import static java.lang.StringTemplate.RAW;
 public class CodeGen {
     public static void main(String[] args) throws IOException {
 
-        String name = "Event";
+        String name = "Category";
         String pluralName = getPluralName(name);
 
-        generateDDL(name, pluralName);
-        generateService(name, pluralName);
-        generateServiceTest(name, pluralName);
+        String packageName = CodeGen.class.getPackageName()
+                .replace(".util","");
+
+        generateDDL(name, pluralName, packageName);
+        generateService(name, pluralName, packageName);
+        generateServiceTest(name, pluralName, packageName);
     }
 
     private static String getPluralName(String name) {
@@ -25,15 +29,15 @@ public class CodeGen {
         return name + "s";
     }
 
-    private static void generateServiceTest(String name,String pluralName) throws IOException {
+    private static void generateServiceTest(String name,String pluralName,String packageName) throws IOException {
 
         StringTemplate SERVICE_TEST_TEMPLATE = RAW
                 ."""
 
-                package com.gurukulams.core.service;
+                package \{packageName}.service;
 
-                import com.gurukulams.core.model.\{name};
-                import com.gurukulams.core.util.TestUtil;
+                import \{packageName}.model.\{name};
+                import \{packageName}.util.TestUtil;
                 import org.junit.jupiter.api.AfterEach;
                 import org.junit.jupiter.api.Assertions;
                 import org.junit.jupiter.api.BeforeEach;
@@ -196,22 +200,27 @@ public class CodeGen {
                     }
                 }
                 """;
-        Files.write(
+        writeFile(
                 Paths.get(RAW. "src/test/java/com/gurukulams/core/service/\{name}ServiceTest.java".interpolate()),
-                SERVICE_TEST_TEMPLATE.interpolate().getBytes(),
-                StandardOpenOption.CREATE);
+                SERVICE_TEST_TEMPLATE.interpolate());
     }
-    private static void generateService(String name,String pluralName) throws IOException {
+    
+    private static void generateService(String name,String pluralName,String packageName) throws IOException {
         StringTemplate SERVICE_TEMPLATE = RAW
                 ."""
-                package com.gurukulams.core.service;
+                package \{packageName}.service;
 
-                import com.gurukulams.core.GurukulamsManager;
-                import com.gurukulams.core.model.\{name};
-                import com.gurukulams.core.model.\{name}Localized;
-                import com.gurukulams.core.store.\{name}LocalizedStore;
-                import com.gurukulams.core.store.\{name}Store;
+                import \{packageName}.GurukulamsManager;
+                import \{packageName}.model.\{name};
+                import \{packageName}.model.\{name}Localized;
+                import \{packageName}.store.\{name}LocalizedStore;
+                import \{packageName}.store.\{name}Store;
+                import static com.gurukulams.core.store.\{name}Store.id;
+                import static com.gurukulams.core.store.\{name}Store.title;
+                import static com.gurukulams.core.store.\{name}Store.modifiedBy;
 
+                import static com.gurukulams.core.store.\{name}LocalizedStore.locale;
+                import static com.gurukulams.core.store.\{name}LocalizedStore.\{name.toLowerCase()}Id;
 
                 import java.sql.SQLException;
                 import java.util.List;
@@ -225,6 +234,25 @@ public class CodeGen {
                 public class \{name}Service {
 
                     /**
+                     * Locale Specific Read Query.
+                     */
+                    private static final String READ_QUERY = ""\"
+                            select distinct c.id,
+                                case when cl.locale = ?
+                                    then cl.title
+                                    else c.title
+                                end as title,
+                                case when cl.locale = ?
+                                    then cl.description
+                                    else c.description
+                                end as description,
+                                created_at, created_by, modified_at, modified_by
+                            from \{name.toLowerCase()} c
+                            left join \{name.toLowerCase()}_localized cl on c.id = cl.\{name.toLowerCase()}_id
+                            where cl.locale is null
+                                or cl.locale = ?
+                            ""\";
+                    /**
                      * \{name.toLowerCase()}Store.
                      */
                     private final \{name}Store \{name.toLowerCase()}Store;
@@ -234,11 +262,10 @@ public class CodeGen {
                      */
                     private final \{name}LocalizedStore \{name.toLowerCase()}LocalizedStore;
 
-
                     /**
-                     * Instantiates a new \{name} service.
+                     * Builds a new \{name} service.
                      *
-                     * @param gurukulamsManager
+                     * @param gurukulamsManager database manager.
                      */
                     public \{name}Service(final GurukulamsManager gurukulamsManager) {
                         this.\{name.toLowerCase()}Store = gurukulamsManager.get\{name}Store();
@@ -246,46 +273,53 @@ public class CodeGen {
                                 = gurukulamsManager.get\{name}LocalizedStore();
                     }
 
-
                     /**
                      * Create \{name.toLowerCase()}.
                      *
-                     * @param userName the user name
+                     * @param userName the username
                      * @param locale   the locale
                      * @param \{name.toLowerCase()} the \{name.toLowerCase()}
                      * @return the \{name.toLowerCase()}
                      */
                     public \{name} create(final String userName,
-                                           final Locale locale,
-                                           final \{name} \{name.toLowerCase()})
+                                                    final Locale locale,
+                                                    final \{name} \{name.toLowerCase()})
                             throws SQLException {
+                        UUID id = UUID.randomUUID();
+                        \{name.toLowerCase()}.setId(id);
                         \{name.toLowerCase()}.setCreatedBy(userName);
                         this.\{name.toLowerCase()}Store.insert().values(\{name.toLowerCase()}).execute();
-
                         if (locale != null) {
-                            create(\{name.toLowerCase()}.getId(), \{name.toLowerCase()}, locale);
+                            createLocalized(id, locale, \{name.toLowerCase()});
                         }
-
-                        return read(userName, \{name.toLowerCase()}.getId(), locale).get();
+                        return read(userName, id, locale).get();
                     }
 
-                    private int create(final UUID \{name.toLowerCase()}Id,
-                                       final \{name} \{name.toLowerCase()},
-                                       final Locale locale) throws SQLException {
-
-                        \{name}Localized \{name.toLowerCase()}Localized = new \{name}Localized();
-                        \{name.toLowerCase()}Localized.set\{name}Id(\{name.toLowerCase()}Id);
-                        \{name.toLowerCase()}Localized.setLocale(locale.getLanguage());
-                        \{name.toLowerCase()}Localized.setTitle(\{name.toLowerCase()}.getTitle());
+                    /**
+                     * Creates Localized \{name}.
+                     * @param \{name.toLowerCase()}Id
+                     * @param \{name.toLowerCase()}
+                     * @param locale
+                     * @return localized
+                     * @throws SQLException
+                     */
+                    private int createLocalized(final UUID \{name.toLowerCase()}Id,
+                                                final Locale locale,
+                                                final \{name} \{name.toLowerCase()})
+                                                    throws SQLException {
+                        \{name}Localized localized = new \{name}Localized();
+                        localized.set\{name}Id(\{name.toLowerCase()}Id);
+                        localized.setLocale(locale.getLanguage());
+                        localized.setTitle(\{name.toLowerCase()}.getTitle());
                         return this.\{name.toLowerCase()}LocalizedStore.insert()
-                                .values(\{name.toLowerCase()}Localized)
+                                .values(localized)
                                 .execute();
                     }
 
                     /**
                      * Read optional.
                      *
-                     * @param userName the user name
+                     * @param userName the username
                      * @param id       the id
                      * @param locale   the locale
                      * @return the optional
@@ -299,51 +333,20 @@ public class CodeGen {
                             return this.\{name.toLowerCase()}Store.select(id);
                         }
 
-                        final String select\{name}Query =
-                                ""\"
-                                        select distinct c.id,
-                                            case when cl.locale = ?
-                                                then cl.title
-                                                else c.title
-                                            end as title,
-                                            case when cl.locale = ?
-                                                then cl.description
-                                                else c.description
-                                                end as description,
-                                            created_at, created_by, modified_at, modified_by
-                                        from \{name.toLowerCase()} c
-                                        left join \{name.toLowerCase()}_localized cl on c.id = cl.\{name.toLowerCase()}_id
-                                        where c.id = ?
-                                            and (cl.locale is null
-                                            or cl.locale = ?
-                                            or c.id not in (
-                                                select \{name.toLowerCase()}_id
-                                                from \{name.toLowerCase()}_localized
-                                                where \{name.toLowerCase()}_id = c.id
-                                                    and locale = ?
-                                            ))
-                                        ""\";
-
-
-                            return \{name.toLowerCase()}Store.select().sql(select\{name}Query)
-                                            .param(\{name}LocalizedStore
-                                                    .locale(locale.getLanguage()))
-                                            .param(\{name}LocalizedStore
-                                                    .locale(locale.getLanguage()))
-                                            .param(\{name}Store.id(id))
-                                            .param(\{name}LocalizedStore
-                                                    .locale(locale.getLanguage()))
-                                            .param(\{name}LocalizedStore
-                                                    .locale(locale.getLanguage()))
-                                            .optional();
-
+                        return \{name.toLowerCase()}Store.select()
+                                .sql(READ_QUERY + " and c.id = ?")
+                                .param(locale(locale.getLanguage()))
+                                .param(locale(locale.getLanguage()))
+                                .param(locale(locale.getLanguage()))
+                                .param(id(id))
+                                .optional();
                     }
 
                     /**
                      * Update \{name.toLowerCase()}.
                      *
                      * @param id       the id
-                     * @param userName the user name
+                     * @param userName the username
                      * @param locale   the locale
                      * @param \{name.toLowerCase()} the \{name.toLowerCase()}
                      * @return the \{name.toLowerCase()}
@@ -352,47 +355,41 @@ public class CodeGen {
                                            final String userName,
                                            final Locale locale,
                                            final \{name} \{name.toLowerCase()}) throws SQLException {
-
-
-                        int updatedRows = 0;
+                        int updatedRows;
 
                         if (locale == null) {
                             updatedRows = this.\{name.toLowerCase()}Store.update()
-                                    .set(\{name}Store.title(\{name.toLowerCase()}.getTitle()),
-                                            \{name}Store.modifiedBy(userName))
-                                    .where(\{name}Store.id().eq(id)).execute();
+                                    .set(title(\{name.toLowerCase()}.getTitle()),
+                                            modifiedBy(userName))
+                                    .where(id().eq(id)).execute();
                         } else {
                             updatedRows = this.\{name.toLowerCase()}Store.update()
-                                    .set(\{name}Store.modifiedBy(userName))
-                                    .where(\{name}Store.id().eq(id)).execute();
+                                    .set(modifiedBy(userName))
+                                    .where(id().eq(id)).execute();
                             if (updatedRows != 0) {
                                 updatedRows = this.\{name.toLowerCase()}LocalizedStore.update().set(
-                                        \{name}LocalizedStore.title(\{name.toLowerCase()}.getTitle()),
-                                        \{name}LocalizedStore.locale(locale.getLanguage()))
-                                        .where(\{name}LocalizedStore.\{name.toLowerCase()}Id().eq(id)
+                                        title(\{name.toLowerCase()}.getTitle()),
+                                        locale(locale.getLanguage()))
+                                        .where(\{name.toLowerCase()}Id().eq(id)
                                         .and().locale().eq(locale.getLanguage())).execute();
 
                                 if (updatedRows == 0) {
-                                    updatedRows = create(id, \{name.toLowerCase()}, locale);
+                                    updatedRows = createLocalized(id, locale, \{name.toLowerCase()});
                                 }
                             }
                         }
 
-
                         if (updatedRows == 0) {
-
                             throw new IllegalArgumentException("\{name} not found");
                         }
 
                         return read(userName, id, locale).get();
                     }
 
-
-
                     /**
                      * List list.
                      *
-                     * @param userName the user name
+                     * @param userName the username
                      * @param locale   the locale
                      * @return the list
                      */
@@ -401,71 +398,53 @@ public class CodeGen {
                         if (locale == null) {
                             return this.\{name.toLowerCase()}Store.select().execute();
                         }
-                        final String list\{name}Query =
-                                ""\"
-                                        select distinct c.id,
-                                            case when cl.locale = ?
-                                                then cl.title
-                                                else c.title
-                                            end as title,
-                                            case when cl.locale = ?
-                                                then cl.description
-                                                else c.description
-                                            end as description,
-                                            created_at, created_by, modified_at, modified_by
-                                        from \{name.toLowerCase()} c
-                                        left join \{name.toLowerCase()}_localized cl on c.id = cl.\{name.toLowerCase()}_id
-                                        where cl.locale is null
-                                            or cl.locale = ?
-                                        ""\";
-
-                        return \{name.toLowerCase()}Store.select().sql(list\{name}Query)
-                                .param(\{name}LocalizedStore.locale(locale.getLanguage()))
-                                .param(\{name}LocalizedStore.locale(locale.getLanguage()))
-                                .param(\{name}LocalizedStore.locale(locale.getLanguage()))
+                        return \{name.toLowerCase()}Store.select().sql(READ_QUERY)
+                                .param(locale(locale.getLanguage()))
+                                .param(locale(locale.getLanguage()))
+                                .param(locale(locale.getLanguage()))
                                 .list();
                     }
-
 
                     /**
                      * Delete boolean.
                      *
-                     * @param userName the user name
+                     * @param userName the username
                      * @param id       the id
                      * @return the boolean
                      */
                     public boolean delete(final String userName, final UUID id)
                             throws SQLException {
                         this.\{name.toLowerCase()}LocalizedStore
-                                .delete(\{name}LocalizedStore.\{name.toLowerCase()}Id().eq(id))
+                                .delete(\{name.toLowerCase()}Id().eq(id))
                                 .execute();
-                        return this.\{name.toLowerCase()}Store.delete(id) == 1;
+                        return this.\{name.toLowerCase()}Store
+                                    .delete(id) == 1;
                     }
-
 
                     /**
                      * Cleaning up all \{name.toLowerCase()}.
                      */
                     public void delete() throws SQLException {
-                        this.\{name.toLowerCase()}LocalizedStore.delete().execute();
-                        this.\{name.toLowerCase()}Store.delete().execute();
+                        this.\{name.toLowerCase()}LocalizedStore
+                                .delete()
+                                .execute();
+                        this.\{name.toLowerCase()}Store
+                                .delete()
+                                .execute();
                     }
                 }
+                """ ;
 
-
-                                """ ;
-
-        Files.write(
+        writeFile(
                 Paths.get(RAW. "src/main/java/com/gurukulams/core/service/\{name}Service.java".interpolate()),
-                SERVICE_TEMPLATE.interpolate().getBytes(),
-                StandardOpenOption.CREATE);
+                SERVICE_TEMPLATE.interpolate());
     }
 
-    private static void generateDDL(String name,String pluralName) throws IOException {
+    private static void generateDDL(String name,String pluralName,String packageName) throws IOException {
         StringTemplate DDL_TEMPLATE = RAW
                 ."""
 
-                CREATE TABLE \{name} (
+                CREATE TABLE \{name.toLowerCase()} (
                     id UUID PRIMARY KEY,
                     title VARCHAR(55),
                     description TEXT,
@@ -475,19 +454,29 @@ public class CodeGen {
                     modified_by VARCHAR(200)
                 );
 
-                CREATE TABLE \{name}_localized (
+                CREATE TABLE \{name.toLowerCase()}_localized (
                     \{name.toLowerCase()}_id UUID,
                     locale VARCHAR(8) NOT NULL,
                     title VARCHAR(55),
                     description TEXT,
-                    FOREIGN KEY (\{name.toLowerCase()}_id) REFERENCES \{name} (id),
+                    FOREIGN KEY (\{name.toLowerCase()}_id) REFERENCES \{name.toLowerCase()} (id),
                     PRIMARY KEY(\{name.toLowerCase()}_id, locale)
                 );
                 """ ;
 
-        Files.write(
-                Paths.get("src/main/resources/db/migration/V1__core.sql"),
-                DDL_TEMPLATE.interpolate().getBytes(),
-                StandardOpenOption.APPEND);
+        writeFile(
+                Paths.get("src/main/resources/db/migration/V2__ext.sql"),
+                DDL_TEMPLATE.interpolate());
     }
+
+
+    private static void writeFile(Path path, String content)
+            throws IOException {
+        path.toFile().delete();
+        Files.write(
+                path,
+                content.getBytes(),
+                StandardOpenOption.CREATE);
+    }
+
 }
