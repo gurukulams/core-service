@@ -11,7 +11,7 @@ import static java.lang.StringTemplate.RAW;
 public class CodeGen {
     public static void main(String[] args) throws IOException {
 
-        String name = "Category";
+        String name = "Event";
         String pluralName = getPluralName(name);
 
         String packageName = CodeGen.class.getPackageName()
@@ -217,6 +217,7 @@ public class CodeGen {
                 import \{packageName}.store.\{name}Store;
                 import static com.gurukulams.core.store.\{name}Store.id;
                 import static com.gurukulams.core.store.\{name}Store.title;
+                import static com.gurukulams.core.store.\{name}Store.description;
                 import static com.gurukulams.core.store.\{name}Store.modifiedBy;
 
                 import static com.gurukulams.core.store.\{name}LocalizedStore.locale;
@@ -360,7 +361,8 @@ public class CodeGen {
                         if (locale == null) {
                             updatedRows = this.\{name.toLowerCase()}Store.update()
                                     .set(title(\{name.toLowerCase()}.getTitle()),
-                                            modifiedBy(userName))
+                                    description(\{name.toLowerCase()}.getDescription()),
+                                    modifiedBy(userName))
                                     .where(id().eq(id)).execute();
                         } else {
                             updatedRows = this.\{name.toLowerCase()}Store.update()
@@ -369,6 +371,7 @@ public class CodeGen {
                             if (updatedRows != 0) {
                                 updatedRows = this.\{name.toLowerCase()}LocalizedStore.update().set(
                                         title(\{name.toLowerCase()}.getTitle()),
+                                        description(\{name.toLowerCase()}.getDescription()),
                                         locale(locale.getLanguage()))
                                         .where(\{name.toLowerCase()}Id().eq(id)
                                         .and().locale().eq(locale.getLanguage())).execute();
@@ -465,7 +468,7 @@ public class CodeGen {
                 """ ;
 
         writeFile(
-                Paths.get("src/main/resources/db/migration/V2__ext.sql"),
+                Paths.get("src/main/resources/db/migration/V2__events.sql"),
                 DDL_TEMPLATE.interpolate());
     }
 

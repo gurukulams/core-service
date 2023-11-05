@@ -8,6 +8,9 @@ schemaName: "gurukulams_db"
 # Mapping Logic
 rootPackage: "com.gurukulams.core"
 
+wordsMap:
+  events: event
+
 insertMap:
   CREATED_DATE: CURRENT_TIMESTAMP
   MODIFIED_DATE:
