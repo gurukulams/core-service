@@ -2,6 +2,7 @@ package com.gurukulams.core.payload;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
 
 import java.time.LocalDate;
 
@@ -15,6 +16,7 @@ public class RegistrationRequest {
      * firstName.
      */
     @NotBlank
+    @Pattern(regexp = "^([a-zA-Z]+\\s)*[a-zA-Z]+$")
     private String name;
 
     /**
