@@ -13,6 +13,7 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -77,7 +78,8 @@ public class LearnerService {
                                         .apply(signUpRequest.getPassword()),
                                 signUpRequest.getImageUrl(),
                                 signUpRequest
-                                        .getAuthProvider(), null,
+                                        .getAuthProvider(),
+                                LocalDateTime.now(),
                                 null));
             }
         } else {

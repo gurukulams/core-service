@@ -12,10 +12,8 @@ wordsMap:
   events: event
 
 insertMap:
-  CREATED_DATE: CURRENT_TIMESTAMP
-  MODIFIED_DATE:
+  MODIFIED_AT:
   MODIFIED_BY:
 updateMap:
-  MODIFIED_DATE: CURRENT_TIMESTAMP
-  CREATED_DATE:
+  created_at:
   CREATED_BY:

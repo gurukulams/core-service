@@ -10,6 +10,7 @@ import static com.gurukulams.core.store.TagStore.title;
 import static com.gurukulams.core.store.TagStore.modifiedBy;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -75,6 +76,7 @@ public class TagService {
                                     final Tag tag)
             throws SQLException {
         tag.setCreatedBy(userName);
+        tag.setCreatedAt(LocalDateTime.now());
         this.tagStore.insert().values(tag).execute();
         if (locale != null) {
             createLocalized(locale, tag);

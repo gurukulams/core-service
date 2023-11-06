@@ -7,6 +7,7 @@ import com.gurukulams.core.store.HandleStore;
 import com.gurukulams.core.store.OrgStore;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,6 +42,7 @@ public class OrgService {
     public Org create(final String userName,
                       final Org org) throws SQLException {
         org.setCreatedBy(userName);
+        org.setCreatedAt(LocalDateTime.now());
         createHandle(org.getUserHandle());
         return this.orgStore.insert().values(org).returning();
     }

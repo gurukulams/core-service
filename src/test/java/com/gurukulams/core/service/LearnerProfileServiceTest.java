@@ -56,15 +56,54 @@ class LearnerProfileServiceTest {
     @Test
     void testInvalidCreate() {
         RegistrationRequest registrationRequest = new RegistrationRequest();
-        registrationRequest.setDob(LocalDate.now().plusYears(20L));
         registrationRequest.setName("Hello");
 
+        // Future DOB ?! - Not Valid
+        registrationRequest.setDob(LocalDate.now().plusYears(20L));
         Assertions.assertThrows(ConstraintViolationException.class, () -> {
             learnerProfileService.create(learnerService
                             .readByEmail(LearnerServiceTest.aSignupRequest().getEmail())
                             .get().userHandle(),
                     registrationRequest);
         });
+
+        // More ihan 80 Years ?! - Not Valid
+        registrationRequest.setDob(LocalDate.now().minusYears(81L));
+        Assertions.assertThrows(ConstraintViolationException.class, () -> {
+            learnerProfileService.create(learnerService
+                            .readByEmail(LearnerServiceTest.aSignupRequest().getEmail())
+                            .get().userHandle(),
+                    registrationRequest);
+        });
+
+        // Less than 10 Years ?! - Not Valid
+        registrationRequest.setDob(LocalDate.now().minusYears(9L));
+        Assertions.assertThrows(ConstraintViolationException.class, () -> {
+            learnerProfileService.create(learnerService
+                            .readByEmail(LearnerServiceTest.aSignupRequest().getEmail())
+                            .get().userHandle(),
+                    registrationRequest);
+        });
+
+        // Name with Numbers ? - Not Valid
+        registrationRequest.setName("hjghs565");
+        Assertions.assertThrows(ConstraintViolationException.class, () -> {
+            learnerProfileService.create(learnerService
+                            .readByEmail(LearnerServiceTest.aSignupRequest().getEmail())
+                            .get().userHandle(),
+                    registrationRequest);
+        });
+
+        // Name with Spl Chars ? - Not Valid
+        registrationRequest.setName("hell@#$");
+        Assertions.assertThrows(ConstraintViolationException.class, () -> {
+            learnerProfileService.create(learnerService
+                            .readByEmail(LearnerServiceTest.aSignupRequest().getEmail())
+                            .get().userHandle(),
+                    registrationRequest);
+        });
+
+
     }
 
     @Test
@@ -78,8 +117,8 @@ class LearnerProfileServiceTest {
 
     private RegistrationRequest newRegistrationRequest() {
         RegistrationRequest newRegistrationRequest = new RegistrationRequest();
+        newRegistrationRequest.setName("Sathish Kumar");
         newRegistrationRequest.setDob(LocalDate.now().minusYears(20L));
-        newRegistrationRequest.setName("Hello");
         return newRegistrationRequest;
     }
 }

@@ -13,6 +13,7 @@ import static com.gurukulams.core.store.CategoryLocalizedStore.locale;
 import static com.gurukulams.core.store.CategoryLocalizedStore.categoryId;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -75,6 +76,7 @@ public class CategoryService {
                                     final Category category)
             throws SQLException {
         category.setCreatedBy(userName);
+        category.setCreatedAt(LocalDateTime.now());
         this.categoryStore.insert().values(category).execute();
         if (locale != null) {
             createLocalized(locale, category);
