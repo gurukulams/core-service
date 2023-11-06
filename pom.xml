@@ -9,14 +9,15 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<properties>
-		<maven.compiler.target>21</maven.compiler.target>
-		<maven.compiler.source>21</maven.compiler.source>
-		<maven.compiler.compilerArgs>--enable-preview</maven.compiler.compilerArgs>
+		<java.version>21</java.version>
 
 		<junit.version>5.10.0</junit.version>
 		<archunit.version>1.0.1</archunit.version>
 		<sonar.version>3.9.1.2184</sonar.version>
 		<jacoco.version>0.8.10</jacoco.version>
+
+		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.compilerArgument>-Xlint:-processing</maven.compiler.compilerArgument>
 		<maven.compiler.failOnWarning>true</maven.compiler.failOnWarning>
 
@@ -251,15 +252,6 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>21</source>
-					<target>21</target>
-					<compilerArgs>--enable-preview</compilerArgs>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
