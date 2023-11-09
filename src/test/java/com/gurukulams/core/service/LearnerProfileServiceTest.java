@@ -2,6 +2,7 @@ package com.gurukulams.core.service;
 
 import com.gurukulams.core.model.LearnerProfile;
 import com.gurukulams.core.payload.RegistrationRequest;
+import com.gurukulams.core.payload.SignupRequest;
 import com.gurukulams.core.util.TestUtil;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
@@ -20,6 +21,8 @@ class LearnerProfileServiceTest {
     private final LearnerService learnerService;
 
     private final LearnerProfileService learnerProfileService;
+
+    private final ProfileService profileService;
 
     /**
      * Before.
@@ -51,6 +54,7 @@ class LearnerProfileServiceTest {
         Validator validator = validatorFactory.getValidator();
         this.learnerProfileService = new LearnerProfileService(TestUtil.gurukulamsManager(), validator);
         this.learnerService = new LearnerService(TestUtil.gurukulamsManager(), validator);
+        this.profileService = new ProfileService(this.learnerService,this.learnerProfileService);
     }
 
     @Test
@@ -108,11 +112,14 @@ class LearnerProfileServiceTest {
 
     @Test
     void create() throws SQLException {
-        final LearnerProfile org = learnerProfileService.create(learnerService
-                        .readByEmail(LearnerServiceTest.aSignupRequest().getEmail())
+        SignupRequest signupRequest = LearnerServiceTest.aSignupRequest();
+        Assertions.assertFalse(profileService.read(this.learnerService.readByEmail(signupRequest.getEmail()).get().userHandle()).isPresent());
+        final LearnerProfile learnerProfile = learnerProfileService.create(learnerService
+                        .readByEmail(signupRequest.getEmail())
                         .get().userHandle(),
                 newRegistrationRequest());
-        Assertions.assertTrue(learnerProfileService.read(org.getUserHandle()).isPresent(), "Created org");
+        Assertions.assertTrue(learnerProfileService.read(learnerProfile.getUserHandle()).isPresent(), "Created learnerProfile");
+        Assertions.assertTrue(profileService.read(learnerProfile.getUserHandle()).isPresent());
     }
 
     private RegistrationRequest newRegistrationRequest() {
