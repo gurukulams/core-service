@@ -111,7 +111,7 @@ class LearnerServiceTest {
                 existingLearner.modifiedAt());
     }
 
-    static SignupRequest aSignupRequest() {
+    public static SignupRequest aSignupRequest() {
         SignupRequest signupRequest = new SignupRequest();
         signupRequest.setEmail(EMAIL);
         signupRequest.setImageUrl("/images/" + HANDLE + ".png");
