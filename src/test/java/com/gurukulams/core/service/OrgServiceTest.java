@@ -24,6 +24,8 @@ class OrgServiceTest {
 
 
     private final OrgService orgService;
+
+    private final ProfileService profileService;
     private final LearnerService learnerService;
 
     OrgServiceTest() {
@@ -32,6 +34,10 @@ class OrgServiceTest {
         Validator validator = validatorFactory.getValidator();
         this.learnerService = new LearnerService(TestUtil.gurukulamsManager(), validator);
         this.orgService = new OrgService(TestUtil.gurukulamsManager());
+        this.profileService = new ProfileService(TestUtil.gurukulamsManager(),
+                this.learnerService,
+                new LearnerProfileService(TestUtil.gurukulamsManager(), validator),
+                this.orgService);
     }
 
     /**
@@ -79,6 +85,9 @@ class OrgServiceTest {
                 null, anOrg());
         Assertions.assertTrue(orgService.read("hari", org.getUserHandle(), null).isPresent(),
                 "Created Org");
+        Assertions.assertEquals(org.getImageUrl(),
+                this.profileService.read(org.getUserHandle()).get().imageUrl());
+
     }
 
     @Test
@@ -217,6 +226,7 @@ class OrgServiceTest {
         org.setUserHandle(UUID.randomUUID().toString());
         org.setTitle(UUID.randomUUID().toString());
         org.setDescription("HariOrg");
+        org.setImageUrl("HariOrg");
         return org;
     }
 

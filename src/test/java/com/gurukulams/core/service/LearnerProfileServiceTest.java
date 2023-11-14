@@ -54,7 +54,8 @@ class LearnerProfileServiceTest {
         Validator validator = validatorFactory.getValidator();
         this.learnerProfileService = new LearnerProfileService(TestUtil.gurukulamsManager(), validator);
         this.learnerService = new LearnerService(TestUtil.gurukulamsManager(), validator);
-        this.profileService = new ProfileService(this.learnerService,this.learnerProfileService);
+        this.profileService = new ProfileService(TestUtil.gurukulamsManager(),this.learnerService,this.learnerProfileService,
+                new OrgService(TestUtil.gurukulamsManager()));
     }
 
     @Test
