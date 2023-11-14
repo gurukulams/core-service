@@ -39,7 +39,7 @@ public class OrgService {
                 case when cl.locale = ?
                     then cl.description
                     else c.description
-                end as description,
+                end as description,image_url,
                 created_at, created_by, modified_at, modified_by
             from org c
             left join org_localized cl on c.user_handle = cl.user_handle

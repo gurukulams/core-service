@@ -2,6 +2,7 @@ CREATE TABLE org (
     user_handle VARCHAR(40) PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
     description VARCHAR(800) NOT NULL,
+    image_url VARCHAR(200) NOT NULL,
     created_at TIMESTAMP NOT NULL,
     created_by VARCHAR(40) NOT NULL,
     modified_at TIMESTAMP,
