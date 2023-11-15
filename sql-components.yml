@@ -17,3 +17,4 @@ insertMap:
 updateMap:
   created_at:
   CREATED_BY:
+  org_type:
