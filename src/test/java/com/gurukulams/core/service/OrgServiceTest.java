@@ -98,9 +98,22 @@ class OrgServiceTest {
         
         Org newOrg = anOrg();
 
+        String newValue = UUID.randomUUID().toString();
+        newOrg.setDescription(newValue);
+
         Org updatedOrg = orgService
                 .update(org.getUserHandle(), "priya", null, newOrg);
-        Assertions.assertEquals(updatedOrg.getTitle(), updatedOrg.getTitle(), "Updated");
+        Assertions.assertEquals(newOrg.getTitle(), updatedOrg.getTitle(), "Updated");
+
+        newOrg.setDescription(UUID.randomUUID().toString());
+        updatedOrg = orgService
+                .update(org.getUserHandle(), "priya", null, newOrg);
+        Assertions.assertEquals(newOrg.getDescription(), updatedOrg.getDescription(), "Updated");
+
+        newOrg.setImageUrl(UUID.randomUUID().toString());
+        updatedOrg = orgService
+                .update(org.getUserHandle(), "priya", null, newOrg);
+        Assertions.assertEquals(newOrg.getImageUrl(), updatedOrg.getImageUrl(), "Updated");
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             orgService
@@ -227,6 +240,7 @@ class OrgServiceTest {
         org.setTitle(UUID.randomUUID().toString());
         org.setDescription("HariOrg");
         org.setImageUrl("HariOrg");
+        org.setOrgType("Company");
         return org;
     }
 

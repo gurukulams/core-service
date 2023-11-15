@@ -10,11 +10,12 @@ import com.gurukulams.core.store.OrgLearnerStore;
 import com.gurukulams.core.store.OrgLocalizedStore;
 import com.gurukulams.core.store.OrgStore;
 
+import static com.gurukulams.core.store.OrgLocalizedStore.locale;
 import static com.gurukulams.core.store.OrgStore.userHandle;
 import static com.gurukulams.core.store.OrgStore.title;
+import static com.gurukulams.core.store.OrgStore.description;
+import static com.gurukulams.core.store.OrgStore.imageUrl;
 import static com.gurukulams.core.store.OrgStore.modifiedBy;
-
-import static com.gurukulams.core.store.OrgLocalizedStore.locale;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -39,7 +40,7 @@ public class OrgService {
                 case when cl.locale = ?
                     then cl.description
                     else c.description
-                end as description,image_url,
+                end as description,org_type, image_url,
                 created_at, created_by, modified_at, modified_by
             from org c
             left join org_localized cl on c.user_handle = cl.user_handle
@@ -173,6 +174,8 @@ public class OrgService {
         if (locale == null) {
             updatedRows = this.orgStore.update()
                     .set(title(org.getTitle()),
+                            description(org.getDescription()),
+                            imageUrl(org.getImageUrl()),
                             modifiedBy(userName))
                     .where(userHandle().eq(userHandle)).execute();
         } else {
@@ -182,6 +185,7 @@ public class OrgService {
             if (updatedRows != 0) {
                 updatedRows = this.orgLocalizedStore.update().set(
                                 title(org.getTitle()),
+                                description(org.getDescription()),
                                 locale(locale.getLanguage()))
                         .where(OrgLocalizedStore.userHandle().eq(userHandle)
                                 .and().locale().eq(locale.getLanguage()))
