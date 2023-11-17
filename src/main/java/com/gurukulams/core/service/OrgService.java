@@ -48,6 +48,10 @@ public class OrgService {
                 or cl.locale = ?
             """;
     /**
+     * Type of Handle for Org.
+     */
+    private static final String HANDLE_TYPE = "org";
+    /**
      * orgStore.
      */
     private final OrgStore orgStore;
@@ -95,7 +99,7 @@ public class OrgService {
                            final Org org)
             throws SQLException {
         Handle handle = new Handle();
-        handle.setType("org");
+        handle.setType(HANDLE_TYPE);
         handle.setUserHandle(org.getUserHandle());
         this.handleStore
                 .insert()
@@ -264,22 +268,22 @@ public class OrgService {
      * Delete boolean.
      *
      * @param userName the username
-     * @param userHandle       the userHandle
+     * @param orgHandle       the orgHandle
      * @return the boolean
      */
-    public boolean delete(final String userName, final String userHandle)
+    public boolean delete(final String userName, final String orgHandle)
             throws SQLException {
 
         this.orgLocalizedStore
-                .delete(OrgLocalizedStore.userHandle().eq(userHandle))
+                .delete(OrgLocalizedStore.userHandle().eq(orgHandle))
                 .execute();
         this.orgLearnerStore
-                .delete(OrgLearnerStore.orgHandle().eq(userHandle))
+                .delete(OrgLearnerStore.orgHandle().eq(orgHandle))
                 .execute();
         this.orgStore
-                .delete(userHandle);
+                .delete(orgHandle);
         return this.handleStore
-                .delete(HandleStore.userHandle().eq(userHandle))
+                .delete(HandleStore.userHandle().eq(orgHandle))
                 .execute() == 1;
     }
 
@@ -296,8 +300,8 @@ public class OrgService {
         this.orgStore
                 .delete()
                 .execute();
-        handleStore
-                .delete(HandleStore.type().eq("Org"))
+        this.handleStore
+                .delete(HandleStore.type().eq(HANDLE_TYPE))
                 .execute();
     }
 }
