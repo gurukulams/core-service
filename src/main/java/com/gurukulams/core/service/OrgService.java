@@ -51,6 +51,12 @@ public class OrgService {
      * Type of Handle for Org.
      */
     private static final String HANDLE_TYPE = "org";
+
+    /**
+     * Separator for Handle.
+     */
+    private static final String SEPARATOR = "-";
+
     /**
      * orgStore.
      */
@@ -98,6 +104,7 @@ public class OrgService {
                            final Locale locale,
                            final Org org)
             throws SQLException {
+        org.setUserHandle(HANDLE_TYPE + SEPARATOR + org.getUserHandle());
         Handle handle = new Handle();
         handle.setType(HANDLE_TYPE);
         handle.setUserHandle(org.getUserHandle());
