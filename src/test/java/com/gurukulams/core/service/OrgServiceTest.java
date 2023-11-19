@@ -86,7 +86,7 @@ class OrgServiceTest {
         Assertions.assertTrue(orgService.read("hari", org.getUserHandle(), null).isPresent(),
                 "Created Org");
         Assertions.assertEquals(org.getImageUrl(),
-                this.profileService.read(org.getUserHandle()).get().imageUrl());
+                this.profileService.read(org.getUserHandle()).get().profilePicture());
 
     }
 
