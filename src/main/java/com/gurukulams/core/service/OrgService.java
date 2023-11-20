@@ -19,6 +19,7 @@ import static com.gurukulams.core.store.OrgStore.modifiedBy;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -232,6 +233,27 @@ public class OrgService {
                 .param(locale(locale.getLanguage()))
                 .param(locale(locale.getLanguage()))
                 .list();
+    }
+
+    /**
+     * get Organizations of an User.
+     * @param userName
+     * @param locale
+     * @return orgs
+     * @throws SQLException
+     */
+    public List<Org> getOrganizationsOf(final String userName,
+                                      final Locale locale) throws SQLException {
+        List<Org> orgs = new ArrayList<>();
+
+        for (OrgLearner orgLearner : this.orgLearnerStore
+                .select(OrgLearnerStore.learnerHandle().eq(userName))
+                .execute()) {
+            orgs.add(this.read(userName, orgLearner.getOrgHandle(),
+                    locale).get());
+        }
+
+        return orgs;
     }
 
     /**

@@ -217,6 +217,9 @@ class OrgServiceTest {
         Assertions.assertFalse(orgService.isRegistered(learner2.userHandle(), org.getUserHandle()));
         Assertions.assertTrue(orgService.register(learner2.userHandle(), org.getUserHandle()));
 
+        Assertions.assertEquals(1, orgService.getOrganizationsOf(learner2.userHandle(), null).size());
+
+
         final Org myOrg = orgService.create(learner2.userHandle(), Locale.GERMAN,
                 anOrg());
 
