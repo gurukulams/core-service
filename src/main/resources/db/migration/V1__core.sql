@@ -22,3 +22,11 @@ CREATE TABLE learner_profile (
     dob DATE NOT NULL,
     FOREIGN KEY (user_handle) REFERENCES handle (user_handle)
 );
+
+CREATE TABLE learner_buddy (
+    buddy_handle VARCHAR(40) NOT NULL,
+    learner_handle VARCHAR(40) NOT NULL,
+    PRIMARY KEY(buddy_handle, learner_handle),
+    FOREIGN KEY (buddy_handle) REFERENCES learner (user_handle),
+    FOREIGN KEY (learner_handle) REFERENCES learner (user_handle)
+);

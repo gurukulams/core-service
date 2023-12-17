@@ -1,6 +1,7 @@
 package com.gurukulams.core.service;
 
 import com.gurukulams.core.model.LearnerProfile;
+import com.gurukulams.core.payload.Learner;
 import com.gurukulams.core.payload.RegistrationRequest;
 import com.gurukulams.core.payload.SignupRequest;
 import com.gurukulams.core.util.TestUtil;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.UUID;
 
 class LearnerProfileServiceTest {
 
@@ -121,6 +123,59 @@ class LearnerProfileServiceTest {
                 newRegistrationRequest());
         Assertions.assertTrue(learnerProfileService.read(learnerProfile.getUserHandle()).isPresent(), "Created learnerProfile");
         Assertions.assertTrue(profileService.read(learnerProfile.getUserHandle()).isPresent());
+    }
+
+    @Test
+    void register() throws SQLException {
+        SignupRequest signupRequest = LearnerServiceTest.aSignupRequest();
+
+        final Learner learner = learnerService.readByEmail(signupRequest.getEmail())
+                .get();
+
+        final LearnerProfile learnerProfile = learnerProfileService.create(learnerService
+                        .readByEmail(signupRequest.getEmail())
+                        .get().userHandle(),
+                newRegistrationRequest());
+
+        signupRequest.setEmail("EMAIL@email.com");
+        learnerService.signUp(signupRequest,
+                s -> String.valueOf(new StringBuilder(s).reverse()));
+        final Learner learner2 = learnerService.readByEmail(signupRequest.getEmail())
+                .get();
+        final LearnerProfile learnerProfile2 = learnerProfileService.create(learnerService
+                        .readByEmail(signupRequest.getEmail())
+                        .get().userHandle(),
+                newRegistrationRequest());
+
+        Assertions.assertTrue(profileService.register(learner.userHandle(), learner2.userHandle()));
+
+        Assertions.assertTrue(profileService.isRegistered(learner.userHandle(), learner2.userHandle()));
+
+        Assertions.assertEquals(1, profileService.getBuddies(learner.userHandle()).size());
+
+        // registering again ? - Invalid
+        Assertions.assertThrows(SQLException.class, () -> {
+            profileService.register(learner.userHandle(), learner2.userHandle());
+        });
+
+        // registering for invalid event ? - Invalid
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            profileService.register(learner.userHandle(), UUID.randomUUID().toString());
+        });
+
+        signupRequest.setEmail("EMAIL3@email.com");
+        learnerService.signUp(signupRequest,
+                s -> String.valueOf(new StringBuilder(s).reverse()));
+        final Learner learner3 = learnerService.readByEmail(signupRequest.getEmail())
+                .get();
+        final LearnerProfile learnerProfile3 = learnerProfileService.create(learnerService
+                        .readByEmail(signupRequest.getEmail())
+                        .get().userHandle(),
+                newRegistrationRequest());
+
+        Assertions.assertTrue(profileService.register(learner.userHandle(), learner3.userHandle()));
+
+        Assertions.assertEquals(2, profileService.getBuddies(learner.userHandle()).size());
     }
 
     private RegistrationRequest newRegistrationRequest() {

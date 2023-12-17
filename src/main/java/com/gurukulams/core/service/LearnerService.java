@@ -6,6 +6,7 @@ import com.gurukulams.core.payload.AuthProvider;
 import com.gurukulams.core.payload.Learner;
 import com.gurukulams.core.payload.SignupRequest;
 import com.gurukulams.core.store.HandleStore;
+import com.gurukulams.core.store.LearnerBuddyStore;
 import com.gurukulams.core.store.LearnerProfileStore;
 import com.gurukulams.core.store.LearnerStore;
 import jakarta.validation.ConstraintViolation;
@@ -36,6 +37,10 @@ public class LearnerService {
      */
     private final HandleStore handleStore;
     /**
+     * LearnerBuddyStore.
+     */
+    private final LearnerBuddyStore learnerBuddyStore;
+    /**
      * Bean Validator.
      */
     private final jakarta.validation.Validator validator;
@@ -53,6 +58,7 @@ public class LearnerService {
         this.learnerStore = gurukulamsManager.getLearnerStore();
         this.handleStore = gurukulamsManager.getHandleStore();
         this.learnerProfileStore = gurukulamsManager.getLearnerProfileStore();
+        this.learnerBuddyStore = gurukulamsManager.getLearnerBuddyStore();
     }
 
 
@@ -169,6 +175,7 @@ public class LearnerService {
      * @throws SQLException the sql exception
      */
     public void delete() throws SQLException {
+        learnerBuddyStore.delete().execute();
         learnerProfileStore.delete().execute();
         learnerStore.delete().execute();
         handleStore.delete(HandleStore.type().eq("Learner")).execute();
