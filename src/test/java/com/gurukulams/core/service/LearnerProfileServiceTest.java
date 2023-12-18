@@ -1,6 +1,7 @@
 package com.gurukulams.core.service;
 
 import com.gurukulams.core.model.LearnerProfile;
+import com.gurukulams.core.model.Org;
 import com.gurukulams.core.payload.Learner;
 import com.gurukulams.core.payload.RegistrationRequest;
 import com.gurukulams.core.payload.SignupRequest;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Locale;
 import java.util.UUID;
 
 class LearnerProfileServiceTest {
@@ -25,6 +27,8 @@ class LearnerProfileServiceTest {
     private final LearnerProfileService learnerProfileService;
 
     private final ProfileService profileService;
+
+    private final OrgService orgService;
 
     /**
      * Before.
@@ -45,8 +49,10 @@ class LearnerProfileServiceTest {
     }
 
     private void cleanUp() throws SQLException {
+        orgService.delete();
         learnerProfileService.delete();
         learnerService.delete();
+        Assertions.assertEquals(0, profileService.list("USER", null).size());
         learnerService.signUp(LearnerServiceTest.aSignupRequest(),
                 s -> String.valueOf(new StringBuilder(s).reverse()));
     }
@@ -58,6 +64,7 @@ class LearnerProfileServiceTest {
         this.learnerService = new LearnerService(TestUtil.gurukulamsManager(), validator);
         this.profileService = new ProfileService(TestUtil.gurukulamsManager(),this.learnerService,this.learnerProfileService,
                 new OrgService(TestUtil.gurukulamsManager()));
+        this.orgService = new OrgService(TestUtil.gurukulamsManager());
     }
 
     @Test
@@ -123,6 +130,22 @@ class LearnerProfileServiceTest {
                 newRegistrationRequest());
         Assertions.assertTrue(learnerProfileService.read(learnerProfile.getUserHandle()).isPresent(), "Created learnerProfile");
         Assertions.assertTrue(profileService.read(learnerProfile.getUserHandle()).isPresent());
+    }
+
+    @Test
+    void list() throws SQLException {
+        SignupRequest signupRequest = LearnerServiceTest.aSignupRequest();
+        Assertions.assertFalse(profileService.read(this.learnerService.readByEmail(signupRequest.getEmail()).get().userHandle()).isPresent());
+        final LearnerProfile learnerProfile = learnerProfileService.create(learnerService
+                        .readByEmail(signupRequest.getEmail())
+                        .get().userHandle(),
+                newRegistrationRequest());
+        Assertions.assertTrue(learnerProfileService.read(learnerProfile.getUserHandle()).isPresent(), "Created learnerProfile");
+
+        final Org org = orgService.create("hari", Locale.GERMAN,
+                OrgServiceTest.anOrg());
+
+        Assertions.assertEquals(2, profileService.list(learnerProfile.getUserHandle(), null).size());
     }
 
     @Test

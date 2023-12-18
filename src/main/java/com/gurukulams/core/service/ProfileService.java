@@ -11,8 +11,12 @@ import com.gurukulams.core.store.LearnerBuddyStore;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+
+import static com.gurukulams.core.store.OrgLocalizedStore.locale;
 
 /**
  * Service Profile relates Requests.
@@ -76,29 +80,33 @@ public class ProfileService {
         Optional<Handle> optionalHandle = this.handleStore.select(userHandle);
 
         if (optionalHandle.isPresent()) {
-            if (optionalHandle.get().getType().equals("Learner")) {
-                Optional<LearnerProfile> learnerProfileOptional =
-                        this.learnerProfileService.read(userHandle);
-                if (learnerProfileOptional.isPresent()) {
-                    return Optional.of(new Profile(userHandle,
-                            learnerProfileOptional.get().getName(),
-                            this.learnerService.read(userHandle).get()
-                                    .imageUrl()));
-                }
-            } else {
-                Optional<Org> optionalOrg = this.orgService
-                        .read(userHandle, userHandle, null);
-                if (optionalOrg.isPresent()) {
-                    return Optional.of(new Profile(userHandle,
-                            optionalOrg.get().getTitle(),
-                            optionalOrg.get().getImageUrl()));
-                }
-            }
-
+            return Optional.ofNullable(getProfile(optionalHandle.get()));
         }
 
-
         return Optional.empty();
+    }
+
+    /**
+     * List list.
+     *
+     * @param userName the username
+     * @param locale   the locale
+     * @return the list
+     */
+    public List<Profile> list(final String userName,
+                          final Locale locale) throws SQLException {
+
+        List<Handle> handles = this.handleStore.select().execute();
+
+        if (!handles.isEmpty()) {
+            List<Profile> profiles = new ArrayList<>(handles.size());
+            for (Handle handle:handles) {
+                profiles.add(getProfile(handle));
+            }
+            return profiles;
+        }
+
+        return Collections.emptyList();
     }
     /**
      * is the Registered for the given event.
@@ -150,5 +158,27 @@ public class ProfileService {
             orgs.add(this.read(orgLearner.getBuddyHandle()).get());
         }
         return orgs;
+    }
+
+    private Profile getProfile(final Handle handle) throws SQLException {
+        if (handle.getType().equals("Learner")) {
+            Optional<LearnerProfile> learnerProfileOptional =
+                    this.learnerProfileService.read(handle.getUserHandle());
+            if (learnerProfileOptional.isPresent()) {
+                return new Profile(handle.getUserHandle(),
+                        learnerProfileOptional.get().getName(),
+                        this.learnerService.read(handle.getUserHandle()).get()
+                                .imageUrl());
+            }
+        } else {
+            Optional<Org> optionalOrg = this.orgService
+                    .read(handle.getUserHandle(), handle.getUserHandle(), null);
+            if (optionalOrg.isPresent()) {
+                return new Profile(handle.getUserHandle(),
+                        optionalOrg.get().getTitle(),
+                        optionalOrg.get().getImageUrl());
+            }
+        }
+        return null;
     }
 }

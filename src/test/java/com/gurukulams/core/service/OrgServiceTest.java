@@ -237,7 +237,7 @@ class OrgServiceTest {
      *
      * @return the practice
      */
-    Org anOrg() {
+    public static Org anOrg() {
         Org org = new Org();
         org.setUserHandle(UUID.randomUUID().toString());
         org.setTitle(UUID.randomUUID().toString());
