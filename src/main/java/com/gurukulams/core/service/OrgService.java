@@ -98,22 +98,25 @@ public class OrgService {
      *
      * @param userName the username
      * @param locale   the locale
-     * @param org the org
+     * @param organization the org
      * @return the org
      */
     public Org create(final String userName,
                            final Locale locale,
-                           final Org org)
+                           final Org organization)
             throws SQLException {
-        org.withUserHandle(HANDLE_TYPE + SEPARATOR + org.userHandle());
+        Org org = organization
+                .withUserHandle(HANDLE_TYPE + SEPARATOR
+                        + organization.userHandle());
+
         Handle handle = new Handle(org.userHandle(),
                 HANDLE_TYPE);
         this.handleStore
                 .insert()
                         .values(handle)
                                 .execute();
-        org.withCreatedBy(userName);
-        org.withCreatedAt(LocalDateTime.now());
+        org = org.withCreatedBy(userName);
+        org = org.withCreatedAt(LocalDateTime.now());
         this.orgStore.insert().values(org).execute();
         if (locale != null) {
             createLocalized(locale, org);

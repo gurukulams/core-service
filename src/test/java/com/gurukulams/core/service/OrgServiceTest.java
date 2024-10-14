@@ -127,9 +127,7 @@ class OrgServiceTest {
         final Org org = orgService.create("hari",
                 null, anOrg());
 
-        Org newOrg = anOrg();
-
-        newOrg.withUserHandle(org.userHandle());
+        Org newOrg = anOrg().withUserHandle(org.userHandle());
 
         Org updatedOrg = orgService
                 .update(org.userHandle(), "priya", Locale.GERMAN, newOrg);
