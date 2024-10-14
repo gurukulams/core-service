@@ -151,7 +151,9 @@ public class LearnerService {
                         null,
                         null);
         final int updatedRows = learnerStore.update()
-                .set(learnerModel).execute();
+                .set(learnerModel)
+                .where(LearnerStore.userHandle().eq(userHandle))
+                .execute();
         if (updatedRows == 0) {
             throw new IllegalArgumentException("Learner not found");
         }
