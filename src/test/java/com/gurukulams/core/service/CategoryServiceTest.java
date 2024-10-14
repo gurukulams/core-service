@@ -21,7 +21,7 @@ class CategoryServiceTest {
     private final CategoryService categoryService;
 
     CategoryServiceTest() {
-        this.categoryService = new CategoryService(TestUtil.gurukulamsManager());
+        this.categoryService = new CategoryService(TestUtil.dataManager());
     }
 
     /**
@@ -51,22 +51,22 @@ class CategoryServiceTest {
     void create() throws SQLException {
         final Category category = categoryService.create("hari"
                 , null, anCategory());
-        Assertions.assertTrue(categoryService.read("hari", category.getId(), null).isPresent(), "Created Category");
+        Assertions.assertTrue(categoryService.read("hari", category.id(), null).isPresent(), "Created Category");
     }
 
     @Test
     void createLocalized() throws SQLException {
         final Category category = categoryService.create("hari"
                 , Locale.GERMAN, anCategory());
-        Assertions.assertTrue(categoryService.read("hari", category.getId(), Locale.GERMAN).isPresent(), "Created Localized Category");
-        Assertions.assertTrue(categoryService.read("hari", category.getId(), null).isPresent(), "Created Category");
+        Assertions.assertTrue(categoryService.read("hari", category.id(), Locale.GERMAN).isPresent(), "Created Localized Category");
+        Assertions.assertTrue(categoryService.read("hari", category.id(), null).isPresent(), "Created Category");
     }
 
     @Test
     void read() throws SQLException {
         final Category category = categoryService.create("hari",
                 null, anCategory());
-        Assertions.assertTrue(categoryService.read("hari", category.getId(), null).isPresent(),
+        Assertions.assertTrue(categoryService.read("hari", category.id(), null).isPresent(),
                 "Created Category");
     }
 
@@ -75,12 +75,12 @@ class CategoryServiceTest {
 
         final Category category = categoryService.create("hari",
                 null, anCategory());
-        Category newCategory = new Category();
-        newCategory.setId(UUID.randomUUID().toString());
-        newCategory.setTitle("HansiCategory");
+        Category newCategory = category.withId(UUID.randomUUID().toString()).withTitle("HansiCategory");
+        newCategory.withId(UUID.randomUUID().toString());
+        newCategory.withTitle("HansiCategory");
         Category updatedCategory = categoryService
-                .update(category.getId(), "priya", null, newCategory);
-        Assertions.assertEquals("HansiCategory", updatedCategory.getTitle(), "Updated");
+                .update(category.id(), "priya", null, newCategory);
+        Assertions.assertEquals("HansiCategory", updatedCategory.title(), "Updated");
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             categoryService
@@ -93,14 +93,12 @@ class CategoryServiceTest {
 
         final Category category = categoryService.create("hari",
                 null, anCategory());
-        Category newCategory = new Category();
-        newCategory.setId(category.getId());
-        newCategory.setTitle("HansiCategory");
+        Category newCategory = category.withTitle("HansiCategory");
         Category updatedCategory = categoryService
-                .update(category.getId(), "priya", Locale.GERMAN, newCategory);
+                .update(category.id(), "priya", Locale.GERMAN, newCategory);
 
-        Assertions.assertEquals("HansiCategory", categoryService.read("mani", category.getId(), Locale.GERMAN).get().getTitle(), "Updated");
-        Assertions.assertNotEquals("HansiCategory", categoryService.read("mani", category.getId(), null).get().getTitle(), "Updated");
+        Assertions.assertEquals("HansiCategory", categoryService.read("mani", category.id(), Locale.GERMAN).get().title(), "Updated");
+        Assertions.assertNotEquals("HansiCategory", categoryService.read("mani", category.id(), null).get().title(), "Updated");
 
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
@@ -114,8 +112,8 @@ class CategoryServiceTest {
 
         final Category category = categoryService.create("hari", null,
                 anCategory());
-        categoryService.delete("mani", category.getId());
-        Assertions.assertFalse(categoryService.read("mani", category.getId(), null).isPresent(), "Deleted Category");
+        categoryService.delete("mani", category.id());
+        Assertions.assertFalse(categoryService.read("mani", category.id(), null).isPresent(), "Deleted Category");
     }
 
     @Test
@@ -123,9 +121,9 @@ class CategoryServiceTest {
 
         final Category category = categoryService.create("hari", null,
                 anCategory());
-        Category newCategory = new Category();
-        newCategory.setId(UUID.randomUUID().toString());
-        newCategory.setTitle("HansiCategory");
+        Category newCategory = category.withId(UUID.randomUUID().toString()).withTitle("HansiCategory");
+        newCategory.withId(UUID.randomUUID().toString());
+        newCategory.withTitle("HansiCategory");
         categoryService.create("hari", null,
                 newCategory);
         List<Category> listofCategories = categoryService.list("hari", null);
@@ -138,9 +136,9 @@ class CategoryServiceTest {
 
         final Category category = categoryService.create("hari", Locale.GERMAN,
                 anCategory());
-        Category newCategory = new Category();
-        newCategory.setId(UUID.randomUUID().toString());
-        newCategory.setTitle("HansiCategory");
+        Category newCategory = category.withId(UUID.randomUUID().toString()).withTitle("HansiCategory");
+        newCategory.withId(UUID.randomUUID().toString());
+        newCategory.withTitle("HansiCategory");
         categoryService.create("hari", null,
                 newCategory);
         List<Category> listofCategories = categoryService.list("hari", null);
@@ -158,9 +156,13 @@ class CategoryServiceTest {
      * @return the practice
      */
     Category anCategory() {
-        Category category = new Category();
-        category.setId(UUID.randomUUID().toString());
-        category.setTitle("HariCategory");
+        Category category = new Category(UUID.randomUUID().toString(),"HariCategory",
+                null,
+                null,
+                "sobhan",
+                null,
+                null);
+
         return category;
     }
 }

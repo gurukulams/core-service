@@ -1,6 +1,6 @@
 package com.gurukulams.core.service;
 
-import com.gurukulams.core.GurukulamsManager;
+import com.gurukulams.core.DataManager;
 import com.gurukulams.core.model.LearnerProfile;
 import com.gurukulams.core.payload.RegistrationRequest;
 import com.gurukulams.core.store.LearnerProfileStore;
@@ -47,15 +47,15 @@ public class LearnerProfileService {
     /**
      * Instantiates a new Learner profile service.
      *
-     * @param gurukulamsManager the jdbc client
+     * @param dataManager the jdbc client
      * @param pValidator
      */
     public LearnerProfileService(
-            final GurukulamsManager gurukulamsManager,
+            final DataManager dataManager,
             final Validator
                     pValidator) {
         this.learnerProfileStore =
-                gurukulamsManager.getLearnerProfileStore();
+                dataManager.getLearnerProfileStore();
         this.validator = pValidator;
     }
 
@@ -76,11 +76,9 @@ public class LearnerProfileService {
         }
 
 
-        LearnerProfile learnerProfile = new LearnerProfile();
-        learnerProfile.setUserHandle(userName);
-        learnerProfile.setName(registrationRequest.getName());
-        learnerProfile.setDob(registrationRequest.getDob());
-
+        LearnerProfile learnerProfile = new LearnerProfile(userName,
+                registrationRequest.getName(),
+                registrationRequest.getDob());
         return this.learnerProfileStore.insert()
                 .values(learnerProfile).returning();
     }
