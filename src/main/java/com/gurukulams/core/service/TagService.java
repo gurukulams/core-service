@@ -1,6 +1,6 @@
 package com.gurukulams.core.service;
 
-import com.gurukulams.core.GurukulamsManager;
+import com.gurukulams.core.DataManager;
 import com.gurukulams.core.model.Tag;
 import com.gurukulams.core.model.TagLocalized;
 import com.gurukulams.core.store.TagLocalizedStore;
@@ -55,12 +55,12 @@ public class TagService {
     /**
      * Builds a new Tag service.
      *
-     * @param gurukulamsManager database manager.
+     * @param dataManager database manager.
      */
-    public TagService(final GurukulamsManager gurukulamsManager) {
-        this.tagStore = gurukulamsManager.getTagStore();
+    public TagService(final DataManager dataManager) {
+        this.tagStore = dataManager.getTagStore();
         this.tagLocalizedStore
-                = gurukulamsManager.getTagLocalizedStore();
+                = dataManager.getTagLocalizedStore();
     }
 
     /**
@@ -75,13 +75,13 @@ public class TagService {
                                     final Locale locale,
                                     final Tag tag)
             throws SQLException {
-        tag.setCreatedBy(userName);
-        tag.setCreatedAt(LocalDateTime.now());
+        tag.withCreatedBy(userName);
+        tag.withCreatedAt(LocalDateTime.now());
         this.tagStore.insert().values(tag).execute();
         if (locale != null) {
             createLocalized(locale, tag);
         }
-        return read(userName, tag.getId(), locale).get();
+        return read(userName, tag.id(), locale).get();
     }
 
     /**
@@ -94,10 +94,10 @@ public class TagService {
     private int createLocalized(final Locale locale,
                                 final Tag tag)
                                     throws SQLException {
-        TagLocalized localized = new TagLocalized();
-        localized.setTagId(tag.getId());
-        localized.setLocale(locale.getLanguage());
-        localized.setTitle(tag.getTitle());
+        TagLocalized localized = new TagLocalized(tag.id(),
+                locale.getLanguage(),
+                tag.title(),
+                null);
         return this.tagLocalizedStore.insert()
                 .values(localized)
                 .execute();
@@ -146,7 +146,7 @@ public class TagService {
 
         if (locale == null) {
             updatedRows = this.tagStore.update()
-                    .set(title(tag.getTitle()),
+                    .set(title(tag.title()),
                             modifiedBy(userName))
                     .where(id().eq(id)).execute();
         } else {
@@ -155,7 +155,7 @@ public class TagService {
                     .where(id().eq(id)).execute();
             if (updatedRows != 0) {
                 updatedRows = this.tagLocalizedStore.update().set(
-                        title(tag.getTitle()),
+                        title(tag.title()),
                         locale(locale.getLanguage()))
                         .where(tagId().eq(id)
                         .and().locale().eq(locale.getLanguage())).execute();

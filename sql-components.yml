@@ -12,9 +12,11 @@ wordsMap:
   events: event
 
 insertMap:
-  MODIFIED_AT:
-  MODIFIED_BY:
+    created_at: CURRENT_TIMESTAMP
+    MODIFIED_AT:
+    MODIFIED_BY:
 updateMap:
-  created_at:
-  CREATED_BY:
-  org_type:
+    created_at:
+    CREATED_BY:
+    MODIFIED_AT: CURRENT_TIMESTAMP
+    org_type:

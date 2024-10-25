@@ -21,7 +21,7 @@ class TagServiceTest {
     private final TagService tagService;
 
     TagServiceTest() {
-        this.tagService = new TagService(TestUtil.gurukulamsManager());
+        this.tagService = new TagService(TestUtil.dataManager());
     }
 
     /**
@@ -51,22 +51,22 @@ class TagServiceTest {
     void create() throws SQLException {
         final Tag tag = tagService.create("hari"
                 , null, anTag());
-        Assertions.assertTrue(tagService.read("hari", tag.getId(), null).isPresent(), "Created Tag");
+        Assertions.assertTrue(tagService.read("hari", tag.id(), null).isPresent(), "Created Tag");
     }
 
     @Test
     void createLocalized() throws SQLException {
         final Tag tag = tagService.create("hari"
                 , Locale.GERMAN, anTag());
-        Assertions.assertTrue(tagService.read("hari", tag.getId(), Locale.GERMAN).isPresent(), "Created Localized Tag");
-        Assertions.assertTrue(tagService.read("hari", tag.getId(), null).isPresent(), "Created Tag");
+        Assertions.assertTrue(tagService.read("hari", tag.id(), Locale.GERMAN).isPresent(), "Created Localized Tag");
+        Assertions.assertTrue(tagService.read("hari", tag.id(), null).isPresent(), "Created Tag");
     }
 
     @Test
     void read() throws SQLException {
         final Tag tag = tagService.create("hari",
                 null, anTag());
-        Assertions.assertTrue(tagService.read("hari", tag.getId(), null).isPresent(),
+        Assertions.assertTrue(tagService.read("hari", tag.id(), null).isPresent(),
                 "Created Tag");
     }
 
@@ -75,12 +75,17 @@ class TagServiceTest {
 
         final Tag tag = tagService.create("hari",
                 null, anTag());
-        Tag newTag = new Tag();
-        newTag.setId(UUID.randomUUID().toString());
-        newTag.setTitle("HansiTag");
+//        Tag newTag = new Tag();
+//        newTag.setId(UUID.randomUUID().toString());
+//        newTag.setTitle("HansiTag");
+
+        Tag newTag = tag.withId(UUID.randomUUID().toString()).withTitle("HansiTag");
+
+        newTag.withId(UUID.randomUUID().toString());
+        newTag.withTitle("HansiTag");
         Tag updatedTag = tagService
-                .update(tag.getId(), "priya", null, newTag);
-        Assertions.assertEquals("HansiTag", updatedTag.getTitle(), "Updated");
+                .update(tag.id(), "priya", null, newTag);
+        Assertions.assertEquals("HansiTag", updatedTag.title(), "Updated");
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             tagService
@@ -93,14 +98,14 @@ class TagServiceTest {
 
         final Tag tag = tagService.create("hari",
                 null, anTag());
-        Tag newTag = new Tag();
-        newTag.setId(tag.getId());
-        newTag.setTitle("HansiTag");
+        Tag newTag = tag.withId(tag.id()).withTitle("HansiTag");
+        newTag.withId(tag.id());
+        newTag.withTitle("HansiTag");
         Tag updatedTag = tagService
-                .update(tag.getId(), "priya", Locale.GERMAN, newTag);
+                .update(tag.id(), "priya", Locale.GERMAN, newTag);
 
-        Assertions.assertEquals("HansiTag", tagService.read("mani", tag.getId(), Locale.GERMAN).get().getTitle(), "Updated");
-        Assertions.assertNotEquals("HansiTag", tagService.read("mani", tag.getId(), null).get().getTitle(), "Updated");
+        Assertions.assertEquals("HansiTag", tagService.read("mani", tag.id(), Locale.GERMAN).get().title(), "Updated");
+        Assertions.assertNotEquals("HansiTag", tagService.read("mani", tag.id(), null).get().title(), "Updated");
 
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
@@ -114,8 +119,8 @@ class TagServiceTest {
 
         final Tag tag = tagService.create("hari", null,
                 anTag());
-        tagService.delete("mani", tag.getId());
-        Assertions.assertFalse(tagService.read("mani", tag.getId(), null).isPresent(), "Deleted Tag");
+        tagService.delete("mani", tag.id());
+        Assertions.assertFalse(tagService.read("mani", tag.id(), null).isPresent(), "Deleted Tag");
     }
 
     @Test
@@ -123,9 +128,9 @@ class TagServiceTest {
 
         final Tag tag = tagService.create("hari", null,
                 anTag());
-        Tag newTag = new Tag();
-        newTag.setId(UUID.randomUUID().toString());
-        newTag.setTitle("HansiTag");
+        Tag newTag = tag.withId(UUID.randomUUID().toString()).withTitle("HansiTag");
+        newTag.withId(UUID.randomUUID().toString());
+        newTag.withTitle("HansiTag");
         tagService.create("hari", null,
                 newTag);
         List<Tag> listofCategories = tagService.list("hari", null);
@@ -138,9 +143,9 @@ class TagServiceTest {
 
         final Tag tag = tagService.create("hari", Locale.GERMAN,
                 anTag());
-        Tag newTag = new Tag();
-        newTag.setId(UUID.randomUUID().toString());
-        newTag.setTitle("HansiTag");
+        Tag newTag = tag.withId(UUID.randomUUID().toString()).withTitle("HansiTag");
+        newTag.withId(UUID.randomUUID().toString());
+        newTag.withTitle("HansiTag");
         tagService.create("hari", null,
                 newTag);
         List<Tag> listofCategories = tagService.list("hari", null);
@@ -158,9 +163,10 @@ class TagServiceTest {
      * @return the practice
      */
     Tag anTag() {
-        Tag tag = new Tag();
-        tag.setId(UUID.randomUUID().toString());
-        tag.setTitle("HariTag");
+        Tag tag = new Tag(UUID.randomUUID().toString(),"HariTag",
+                null,null,"sobhan",
+                null,null);
+
         return tag;
     }
 }

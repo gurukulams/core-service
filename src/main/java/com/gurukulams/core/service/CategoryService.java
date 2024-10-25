@@ -1,6 +1,6 @@
 package com.gurukulams.core.service;
 
-import com.gurukulams.core.GurukulamsManager;
+import com.gurukulams.core.DataManager;
 import com.gurukulams.core.model.Category;
 import com.gurukulams.core.model.CategoryLocalized;
 import com.gurukulams.core.store.CategoryLocalizedStore;
@@ -55,12 +55,12 @@ public class CategoryService {
     /**
      * Builds a new Category service.
      *
-     * @param gurukulamsManager database manager.
+     * @param dataManager database manager.
      */
-    public CategoryService(final GurukulamsManager gurukulamsManager) {
-        this.categoryStore = gurukulamsManager.getCategoryStore();
+    public CategoryService(final DataManager dataManager) {
+        this.categoryStore = dataManager.getCategoryStore();
         this.categoryLocalizedStore
-                = gurukulamsManager.getCategoryLocalizedStore();
+                = dataManager.getCategoryLocalizedStore();
     }
 
     /**
@@ -75,13 +75,13 @@ public class CategoryService {
                                     final Locale locale,
                                     final Category category)
             throws SQLException {
-        category.setCreatedBy(userName);
-        category.setCreatedAt(LocalDateTime.now());
+        category.withCreatedBy(userName);
+        category.withCreatedAt(LocalDateTime.now());
         this.categoryStore.insert().values(category).execute();
         if (locale != null) {
             createLocalized(locale, category);
         }
-        return read(userName, category.getId(), locale).get();
+        return read(userName, category.id(), locale).get();
     }
 
     /**
@@ -94,10 +94,10 @@ public class CategoryService {
     private int createLocalized(final Locale locale,
                                 final Category category)
                                     throws SQLException {
-        CategoryLocalized localized = new CategoryLocalized();
-        localized.setCategoryId(category.getId());
-        localized.setLocale(locale.getLanguage());
-        localized.setTitle(category.getTitle());
+        CategoryLocalized localized = new CategoryLocalized(category.id(),
+                locale.getLanguage(),
+                category.title(),
+                null);
         return this.categoryLocalizedStore.insert()
                 .values(localized)
                 .execute();
@@ -146,7 +146,7 @@ public class CategoryService {
 
         if (locale == null) {
             updatedRows = this.categoryStore.update()
-                    .set(title(category.getTitle()),
+                    .set(title(category.title()),
                             modifiedBy(userName))
                     .where(id().eq(id)).execute();
         } else {
@@ -155,7 +155,7 @@ public class CategoryService {
                     .where(id().eq(id)).execute();
             if (updatedRows != 0) {
                 updatedRows = this.categoryLocalizedStore.update().set(
-                        title(category.getTitle()),
+                        title(category.title()),
                         locale(locale.getLanguage()))
                         .where(categoryId().eq(id)
                         .and().locale().eq(locale.getLanguage())).execute();

@@ -60,11 +60,11 @@ class LearnerProfileServiceTest {
     LearnerProfileServiceTest() {
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
         Validator validator = validatorFactory.getValidator();
-        this.learnerProfileService = new LearnerProfileService(TestUtil.gurukulamsManager(), validator);
-        this.learnerService = new LearnerService(TestUtil.gurukulamsManager(), validator);
-        this.profileService = new ProfileService(TestUtil.gurukulamsManager(),this.learnerService,this.learnerProfileService,
-                new OrgService(TestUtil.gurukulamsManager()));
-        this.orgService = new OrgService(TestUtil.gurukulamsManager());
+        this.learnerProfileService = new LearnerProfileService(TestUtil.dataManager(), validator);
+        this.learnerService = new LearnerService(TestUtil.dataManager(), validator);
+        this.profileService = new ProfileService(TestUtil.dataManager(),this.learnerService,this.learnerProfileService,
+                new OrgService(TestUtil.dataManager()));
+        this.orgService = new OrgService(TestUtil.dataManager());
     }
 
     @Test
@@ -128,8 +128,8 @@ class LearnerProfileServiceTest {
                         .readByEmail(signupRequest.getEmail())
                         .get().userHandle(),
                 newRegistrationRequest());
-        Assertions.assertTrue(learnerProfileService.read(learnerProfile.getUserHandle()).isPresent(), "Created learnerProfile");
-        Assertions.assertTrue(profileService.read(learnerProfile.getUserHandle()).isPresent());
+        Assertions.assertTrue(learnerProfileService.read(learnerProfile.userHandle()).isPresent(), "Created learnerProfile");
+        Assertions.assertTrue(profileService.read(learnerProfile.userHandle()).isPresent());
     }
 
     @Test
@@ -140,12 +140,12 @@ class LearnerProfileServiceTest {
                         .readByEmail(signupRequest.getEmail())
                         .get().userHandle(),
                 newRegistrationRequest());
-        Assertions.assertTrue(learnerProfileService.read(learnerProfile.getUserHandle()).isPresent(), "Created learnerProfile");
+        Assertions.assertTrue(learnerProfileService.read(learnerProfile.userHandle()).isPresent(), "Created learnerProfile");
 
         final Org org = orgService.create("hari", Locale.GERMAN,
                 OrgServiceTest.anOrg());
 
-        Assertions.assertEquals(2, profileService.list(learnerProfile.getUserHandle(), null).size());
+        Assertions.assertEquals(2, profileService.list(learnerProfile.userHandle(), null).size());
     }
 
     @Test

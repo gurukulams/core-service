@@ -32,11 +32,11 @@ class OrgServiceTest {
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
 
         Validator validator = validatorFactory.getValidator();
-        this.learnerService = new LearnerService(TestUtil.gurukulamsManager(), validator);
-        this.orgService = new OrgService(TestUtil.gurukulamsManager());
-        this.profileService = new ProfileService(TestUtil.gurukulamsManager(),
+        this.learnerService = new LearnerService(TestUtil.dataManager(), validator);
+        this.orgService = new OrgService(TestUtil.dataManager());
+        this.profileService = new ProfileService(TestUtil.dataManager(),
                 this.learnerService,
-                new LearnerProfileService(TestUtil.gurukulamsManager(), validator),
+                new LearnerProfileService(TestUtil.dataManager(), validator),
                 this.orgService);
     }
 
@@ -68,25 +68,25 @@ class OrgServiceTest {
     void create() throws SQLException {
         final Org org = orgService.create("hari"
                 , null, anOrg());
-        Assertions.assertTrue(orgService.read("hari", org.getUserHandle(), null).isPresent(), "Created Org");
+        Assertions.assertTrue(orgService.read("hari", org.userHandle(), null).isPresent(), "Created Org");
     }
 
     @Test
     void createLocalized() throws SQLException {
         final Org org = orgService.create("hari"
                 , Locale.GERMAN, anOrg());
-        Assertions.assertTrue(orgService.read("hari", org.getUserHandle(), Locale.GERMAN).isPresent(), "Created Localized Org");
-        Assertions.assertTrue(orgService.read("hari", org.getUserHandle(), null).isPresent(), "Created Org");
+        Assertions.assertTrue(orgService.read("hari", org.userHandle(), Locale.GERMAN).isPresent(), "Created Localized Org");
+        Assertions.assertTrue(orgService.read("hari", org.userHandle(), null).isPresent(), "Created Org");
     }
 
     @Test
     void read() throws SQLException {
         final Org org = orgService.create("hari",
                 null, anOrg());
-        Assertions.assertTrue(orgService.read("hari", org.getUserHandle(), null).isPresent(),
+        Assertions.assertTrue(orgService.read("hari", org.userHandle(), null).isPresent(),
                 "Created Org");
-        Assertions.assertEquals(org.getImageUrl(),
-                this.profileService.read(org.getUserHandle()).get().profilePicture());
+        Assertions.assertEquals(org.imageUrl(),
+                this.profileService.read(org.userHandle()).get().profilePicture());
 
     }
 
@@ -99,21 +99,21 @@ class OrgServiceTest {
         Org newOrg = anOrg();
 
         String newValue = UUID.randomUUID().toString();
-        newOrg.setDescription(newValue);
+        newOrg.withDescription(newValue);
 
         Org updatedOrg = orgService
-                .update(org.getUserHandle(), "priya", null, newOrg);
-        Assertions.assertEquals(newOrg.getTitle(), updatedOrg.getTitle(), "Updated");
+                .update(org.userHandle(), "priya", null, newOrg);
+        Assertions.assertEquals(newOrg.title(), updatedOrg.title(), "Updated");
 
-        newOrg.setDescription(UUID.randomUUID().toString());
+        newOrg.withDescription(UUID.randomUUID().toString());
         updatedOrg = orgService
-                .update(org.getUserHandle(), "priya", null, newOrg);
-        Assertions.assertEquals(newOrg.getDescription(), updatedOrg.getDescription(), "Updated");
+                .update(org.userHandle(), "priya", null, newOrg);
+        Assertions.assertEquals(newOrg.description(), updatedOrg.description(), "Updated");
 
-        newOrg.setImageUrl(UUID.randomUUID().toString());
+        newOrg.withImageUrl(UUID.randomUUID().toString());
         updatedOrg = orgService
-                .update(org.getUserHandle(), "priya", null, newOrg);
-        Assertions.assertEquals(newOrg.getImageUrl(), updatedOrg.getImageUrl(), "Updated");
+                .update(org.userHandle(), "priya", null, newOrg);
+        Assertions.assertEquals(newOrg.imageUrl(), updatedOrg.imageUrl(), "Updated");
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             orgService
@@ -127,15 +127,13 @@ class OrgServiceTest {
         final Org org = orgService.create("hari",
                 null, anOrg());
 
-        Org newOrg = anOrg();
-
-        newOrg.setUserHandle(org.getUserHandle());
+        Org newOrg = anOrg().withUserHandle(org.userHandle());
 
         Org updatedOrg = orgService
-                .update(org.getUserHandle(), "priya", Locale.GERMAN, newOrg);
+                .update(org.userHandle(), "priya", Locale.GERMAN, newOrg);
 
-        Assertions.assertEquals(updatedOrg.getTitle(), orgService.read("mani", org.getUserHandle(), Locale.GERMAN).get().getTitle(), "Updated");
-        Assertions.assertNotEquals(updatedOrg.getTitle(), orgService.read("mani", org.getUserHandle(), null).get().getTitle(), "Updated");
+        Assertions.assertEquals(updatedOrg.title(), orgService.read("mani", org.userHandle(), Locale.GERMAN).get().title(), "Updated");
+        Assertions.assertNotEquals(updatedOrg.title(), orgService.read("mani", org.userHandle(), null).get().title(), "Updated");
 
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
@@ -149,8 +147,8 @@ class OrgServiceTest {
 
         final Org org = orgService.create("hari", null,
                 anOrg());
-        orgService.delete("mani", org.getUserHandle());
-        Assertions.assertFalse(orgService.read("mani", org.getUserHandle(), null).isPresent(), "Deleted Org");
+        orgService.delete("mani", org.userHandle());
+        Assertions.assertFalse(orgService.read("mani", org.userHandle(), null).isPresent(), "Deleted Org");
     }
 
     @Test
@@ -193,13 +191,13 @@ class OrgServiceTest {
         final Learner learner = learnerService.readByEmail(signupRequest.getEmail())
                 .get();
 
-        Assertions.assertTrue(orgService.register(learner.userHandle(), org.getUserHandle()));
+        Assertions.assertTrue(orgService.register(learner.userHandle(), org.userHandle()));
 
-        Assertions.assertTrue(orgService.isRegistered(learner.userHandle(), org.getUserHandle()));
+        Assertions.assertTrue(orgService.isRegistered(learner.userHandle(), org.userHandle()));
 
         // registering again ? - Invalid
         Assertions.assertThrows(SQLException.class, () -> {
-            orgService.register(learner.userHandle(), org.getUserHandle());
+            orgService.register(learner.userHandle(), org.userHandle());
         });
 
         // registering for invalid event ? - Invalid
@@ -214,8 +212,8 @@ class OrgServiceTest {
         final Learner learner2 = learnerService.readByEmail(signupRequest.getEmail())
                 .get();
 
-        Assertions.assertFalse(orgService.isRegistered(learner2.userHandle(), org.getUserHandle()));
-        Assertions.assertTrue(orgService.register(learner2.userHandle(), org.getUserHandle()));
+        Assertions.assertFalse(orgService.isRegistered(learner2.userHandle(), org.userHandle()));
+        Assertions.assertTrue(orgService.register(learner2.userHandle(), org.userHandle()));
 
         Assertions.assertEquals(1, orgService.getOrganizationsOf(learner2.userHandle(), null).size());
 
@@ -225,7 +223,7 @@ class OrgServiceTest {
 
         // registering for my own org ? - Invalid
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            orgService.register(learner2.userHandle(), myOrg.getUserHandle());
+            orgService.register(learner2.userHandle(), myOrg.userHandle());
         });
 
 
@@ -238,12 +236,14 @@ class OrgServiceTest {
      * @return the practice
      */
     public static Org anOrg() {
-        Org org = new Org();
-        org.setUserHandle(UUID.randomUUID().toString());
-        org.setTitle(UUID.randomUUID().toString());
-        org.setDescription("HariOrg");
-        org.setImageUrl("HariOrg");
-        org.setOrgType("Company");
+        Org org = new Org(UUID.randomUUID().toString(),UUID.randomUUID().toString(),
+                "HariOrg",
+                "Company",
+                "HariOrg",
+                null,
+                "sobhan",
+                null,
+                null);
         return org;
     }
 

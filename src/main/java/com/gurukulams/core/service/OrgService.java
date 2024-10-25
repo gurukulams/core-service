@@ -1,6 +1,6 @@
 package com.gurukulams.core.service;
 
-import com.gurukulams.core.GurukulamsManager;
+import com.gurukulams.core.DataManager;
 import com.gurukulams.core.model.Handle;
 import com.gurukulams.core.model.Org;
 import com.gurukulams.core.model.OrgLearner;
@@ -81,16 +81,16 @@ public class OrgService {
     /**
      * Builds a new Org service.
      *
-     * @param gurukulamsManager database manager.
+     * @param dataManager database manager.
      */
-    public OrgService(final GurukulamsManager gurukulamsManager) {
-        this.orgStore = gurukulamsManager.getOrgStore();
+    public OrgService(final DataManager dataManager) {
+        this.orgStore = dataManager.getOrgStore();
         this.orgLocalizedStore
-                = gurukulamsManager.getOrgLocalizedStore();
+                = dataManager.getOrgLocalizedStore();
         this.handleStore
-                = gurukulamsManager.getHandleStore();
+                = dataManager.getHandleStore();
         this.orgLearnerStore
-                = gurukulamsManager.getOrgLearnerStore();
+                = dataManager.getOrgLearnerStore();
     }
 
     /**
@@ -98,28 +98,30 @@ public class OrgService {
      *
      * @param userName the username
      * @param locale   the locale
-     * @param org the org
+     * @param organization the org
      * @return the org
      */
     public Org create(final String userName,
                            final Locale locale,
-                           final Org org)
+                           final Org organization)
             throws SQLException {
-        org.setUserHandle(HANDLE_TYPE + SEPARATOR + org.getUserHandle());
-        Handle handle = new Handle();
-        handle.setType(HANDLE_TYPE);
-        handle.setUserHandle(org.getUserHandle());
+        Org org = organization
+                .withUserHandle(HANDLE_TYPE + SEPARATOR
+                        + organization.userHandle());
+
+        Handle handle = new Handle(org.userHandle(),
+                HANDLE_TYPE);
         this.handleStore
                 .insert()
                         .values(handle)
                                 .execute();
-        org.setCreatedBy(userName);
-        org.setCreatedAt(LocalDateTime.now());
+        org = org.withCreatedBy(userName);
+        org = org.withCreatedAt(LocalDateTime.now());
         this.orgStore.insert().values(org).execute();
         if (locale != null) {
             createLocalized(locale, org);
         }
-        return read(userName, org.getUserHandle(), locale).get();
+        return read(userName, org.userHandle(), locale).get();
     }
 
     /**
@@ -132,11 +134,10 @@ public class OrgService {
     private int createLocalized(final Locale locale,
                                 final Org org)
             throws SQLException {
-        OrgLocalized localized = new OrgLocalized();
-        localized.setUserHandle(org.getUserHandle());
-        localized.setLocale(locale.getLanguage());
-        localized.setTitle(org.getTitle());
-        localized.setDescription(org.getDescription());
+        OrgLocalized localized = new OrgLocalized(org.userHandle(),
+                locale.getLanguage(),
+                org.title(),
+                org.description());
         return this.orgLocalizedStore.insert()
                 .values(localized)
                 .execute();
@@ -185,9 +186,9 @@ public class OrgService {
 
         if (locale == null) {
             updatedRows = this.orgStore.update()
-                    .set(title(org.getTitle()),
-                            description(org.getDescription()),
-                            imageUrl(org.getImageUrl()),
+                    .set(title(org.title()),
+                            description(org.description()),
+                            imageUrl(org.imageUrl()),
                             modifiedBy(userName))
                     .where(userHandle().eq(userHandle)).execute();
         } else {
@@ -196,8 +197,8 @@ public class OrgService {
                     .where(userHandle().eq(userHandle)).execute();
             if (updatedRows != 0) {
                 updatedRows = this.orgLocalizedStore.update().set(
-                                title(org.getTitle()),
-                                description(org.getDescription()),
+                                title(org.title()),
+                                description(org.description()),
                                 locale(locale.getLanguage()))
                         .where(OrgLocalizedStore.userHandle().eq(userHandle)
                                 .and().locale().eq(locale.getLanguage()))
@@ -247,9 +248,9 @@ public class OrgService {
         List<Org> orgs = new ArrayList<>();
 
         for (OrgLearner orgLearner : this.orgLearnerStore
-                .select(OrgLearnerStore.learnerHandle().eq(userName))
+                .select().where(OrgLearnerStore.learnerHandle().eq(userName))
                 .execute()) {
-            orgs.add(this.read(userName, orgLearner.getOrgHandle(),
+            orgs.add(this.read(userName, orgLearner.orgHandle(),
                     locale).get());
         }
 
@@ -280,10 +281,9 @@ public class OrgService {
             throws SQLException {
         Optional<Org> optionalOrg = this.read(userName, orgHanle, null);
         if (optionalOrg.isPresent()
-                && !optionalOrg.get().getCreatedBy().equals(userName)) {
-            OrgLearner eventLearner = new OrgLearner();
-            eventLearner.setOrgHandle(orgHanle);
-            eventLearner.setLearnerHandle(userName);
+                && !optionalOrg.get().createdBy().equals(userName)) {
+            OrgLearner eventLearner = new OrgLearner(orgHanle,
+                    userName);
             return this.orgLearnerStore
                     .insert()
                     .values(eventLearner)
