@@ -1,6 +1,6 @@
 package com.gurukulams.core.service;
 
-import com.gurukulams.core.GurukulamsManager;
+import com.gurukulams.core.DataManager;
 import com.gurukulams.core.model.Handle;
 import com.gurukulams.core.model.LearnerBuddy;
 import com.gurukulams.core.model.LearnerProfile;
@@ -50,22 +50,22 @@ public class ProfileService {
     /**
      * this is the constructor.
      *
-     * @param gurukulamsManager
+     * @param dataManager
      * @param theLearnerService
      * @param theLearnerProfileService
      * @param theorgService
      */
-    public ProfileService(final GurukulamsManager gurukulamsManager,
+    public ProfileService(final DataManager dataManager,
                           final LearnerService theLearnerService,
                           final LearnerProfileService theLearnerProfileService,
                           final OrgService theorgService) {
         this.learnerService = theLearnerService;
         this.learnerProfileService = theLearnerProfileService;
         this.handleStore =
-                gurukulamsManager.getHandleStore();
+                dataManager.getHandleStore();
         this.orgService = theorgService;
         this.learnerBuddyStore =
-                gurukulamsManager.getLearnerBuddyStore();
+                dataManager.getLearnerBuddyStore();
     }
 
     /**
@@ -132,9 +132,8 @@ public class ProfileService {
         Optional<Profile> optionalOrg = this.read(userToFollow);
         if (optionalOrg.isPresent()
                 && !userName.equals(userToFollow)) {
-            LearnerBuddy learnerBuddy = new LearnerBuddy();
-            learnerBuddy.setBuddyHandle(userToFollow);
-            learnerBuddy.setLearnerHandle(userName);
+            LearnerBuddy learnerBuddy = new LearnerBuddy(userToFollow,
+                    userName);
             return this.learnerBuddyStore
                     .insert()
                     .values(learnerBuddy)
@@ -153,30 +152,30 @@ public class ProfileService {
         List<Profile> orgs = new ArrayList<>();
 
         for (LearnerBuddy orgLearner : this.learnerBuddyStore
-                .select(LearnerBuddyStore.learnerHandle().eq(userName))
+                .select().where(LearnerBuddyStore.learnerHandle().eq(userName))
                 .execute()) {
-            orgs.add(this.read(orgLearner.getBuddyHandle()).get());
+            orgs.add(this.read(orgLearner.buddyHandle()).get());
         }
         return orgs;
     }
 
     private Profile getProfile(final Handle handle) throws SQLException {
-        if (handle.getType().equals("Learner")) {
+        if (handle.type().equals("Learner")) {
             Optional<LearnerProfile> learnerProfileOptional =
-                    this.learnerProfileService.read(handle.getUserHandle());
+                    this.learnerProfileService.read(handle.userHandle());
             if (learnerProfileOptional.isPresent()) {
-                return new Profile(handle.getUserHandle(),
-                        learnerProfileOptional.get().getName(),
-                        this.learnerService.read(handle.getUserHandle()).get()
+                return new Profile(handle.userHandle(),
+                        learnerProfileOptional.get().name(),
+                        this.learnerService.read(handle.userHandle()).get()
                                 .imageUrl());
             }
         } else {
             Optional<Org> optionalOrg = this.orgService
-                    .read(handle.getUserHandle(), handle.getUserHandle(), null);
+                    .read(handle.userHandle(), handle.userHandle(), null);
             if (optionalOrg.isPresent()) {
-                return new Profile(handle.getUserHandle(),
-                        optionalOrg.get().getTitle(),
-                        optionalOrg.get().getImageUrl());
+                return new Profile(handle.userHandle(),
+                        optionalOrg.get().title(),
+                        optionalOrg.get().imageUrl());
             }
         }
         return null;

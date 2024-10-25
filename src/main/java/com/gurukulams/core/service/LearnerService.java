@@ -1,6 +1,6 @@
 package com.gurukulams.core.service;
 
-import com.gurukulams.core.GurukulamsManager;
+import com.gurukulams.core.DataManager;
 import com.gurukulams.core.model.Handle;
 import com.gurukulams.core.payload.AuthProvider;
 import com.gurukulams.core.payload.Learner;
@@ -48,17 +48,17 @@ public class LearnerService {
     /**
      * this is the constructor.
      *
-     * @param gurukulamsManager the gurukulams manager
+     * @param dataManager the gurukulams manager
      * @param pValidator        the p validator
      */
-    public LearnerService(final GurukulamsManager gurukulamsManager,
+    public LearnerService(final DataManager dataManager,
                           final Validator
                                   pValidator) {
         this.validator = pValidator;
-        this.learnerStore = gurukulamsManager.getLearnerStore();
-        this.handleStore = gurukulamsManager.getHandleStore();
-        this.learnerProfileStore = gurukulamsManager.getLearnerProfileStore();
-        this.learnerBuddyStore = gurukulamsManager.getLearnerBuddyStore();
+        this.learnerStore = dataManager.getLearnerStore();
+        this.handleStore = dataManager.getHandleStore();
+        this.learnerProfileStore = dataManager.getLearnerProfileStore();
+        this.learnerBuddyStore = dataManager.getLearnerBuddyStore();
     }
 
 
@@ -144,14 +144,16 @@ public class LearnerService {
                           final Learner learner) throws SQLException {
 
         com.gurukulams.core.model.Learner learnerModel =
-                new com.gurukulams.core.model.Learner();
-        learnerModel.setUserHandle(userHandle);
-        learnerModel.setProvider(learner.provider().toString());
-        learnerModel.setEmail(learner.email());
-        learnerModel.setPword(learner.password());
-        learnerModel.setImageUrl(learner.imageUrl());
+                new com.gurukulams.core.model.Learner(userHandle,
+                        learner.email(), learner.imageUrl(),
+                        learner.provider().toString(),
+                        learner.password(),
+                        null,
+                        null);
         final int updatedRows = learnerStore.update()
-                .set(learnerModel).execute();
+                .set(learnerModel)
+                .where(LearnerStore.userHandle().eq(userHandle))
+                .execute();
         if (updatedRows == 0) {
             throw new IllegalArgumentException("Learner not found");
         }
@@ -161,9 +163,7 @@ public class LearnerService {
 
     private Optional<Handle> createHandle(final String userHandle)
             throws SQLException {
-        Handle handle = new Handle();
-        handle.setUserHandle(userHandle);
-        handle.setType("Learner");
+        Handle handle = new Handle(userHandle, "Learner");
         return Optional.of(this.handleStore.insert()
                 .values(handle).returning());
     }
@@ -191,27 +191,26 @@ public class LearnerService {
     private Learner getLearner(
             final com.gurukulams.core.model.Learner learner) {
         return new Learner(
-                learner.getUserHandle(),
-                learner.getEmail(),
-                learner.getPword(),
-                learner.getImageUrl(),
-                AuthProvider.valueOf(learner.getProvider()),
-                learner.getCreatedAt(),
-                learner.getModifiedAt()
+                learner.userHandle(),
+                learner.email(),
+                learner.pword(),
+                learner.imageUrl(),
+                AuthProvider.valueOf(learner.provider()),
+                learner.createdAt(),
+                learner.modifiedAt()
         );
     }
 
     private com.gurukulams.core.model.Learner getLearner(
             final Learner learner) {
         com.gurukulams.core.model.Learner l =
-                new com.gurukulams.core.model.Learner();
-        l.setEmail(learner.email());
-        l.setImageUrl(learner.imageUrl());
-        l.setProvider(learner.provider().toString());
-        l.setPword(learner.password());
-        l.setCreatedAt(learner.createdAt());
-        l.setModifiedAt(learner.modifiedAt());
-        l.setUserHandle(learner.userHandle());
+                new com.gurukulams.core.model.Learner(learner.userHandle(),
+                        learner.email(),
+                        learner.imageUrl(),
+                        learner.provider().toString(),
+                        learner.password(),
+                        learner.createdAt(),
+                        learner.modifiedAt());
         return l;
     }
 }
