@@ -60,11 +60,11 @@ class LearnerProfileServiceTest {
     LearnerProfileServiceTest() {
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
         Validator validator = validatorFactory.getValidator();
-        this.learnerProfileService = new LearnerProfileService(TestUtil.dataManager(), validator);
-        this.learnerService = new LearnerService(TestUtil.dataManager(), validator);
-        this.profileService = new ProfileService(TestUtil.dataManager(),this.learnerService,this.learnerProfileService,
-                new OrgService(TestUtil.dataManager()));
-        this.orgService = new OrgService(TestUtil.dataManager());
+        this.learnerProfileService = new LearnerProfileService(TestUtil.getDataSource(), TestUtil.dataManager(), validator);
+        this.learnerService = new LearnerService(TestUtil.getDataSource(), TestUtil.dataManager(), validator);
+        this.profileService = new ProfileService(TestUtil.getDataSource(), TestUtil.dataManager(),this.learnerService,this.learnerProfileService,
+                new OrgService(TestUtil.getDataSource(), TestUtil.dataManager()));
+        this.orgService = new OrgService(TestUtil.getDataSource(), TestUtil.dataManager());
     }
 
     @Test

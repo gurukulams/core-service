@@ -35,7 +35,7 @@
 		<repository>
 			<id>github</id>
 			<name>GitHub Packages</name>
-			<url>https://maven.pkg.github.com/gurukulams/gurukulams-core</url>
+			<url>https://maven.pkg.github.com/gurukulams/core-service</url>
 		</repository>
 	</distributionManagement>
 

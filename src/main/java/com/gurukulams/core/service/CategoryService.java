@@ -5,6 +5,9 @@ import com.gurukulams.core.model.Category;
 import com.gurukulams.core.model.CategoryLocalized;
 import com.gurukulams.core.store.CategoryLocalizedStore;
 import com.gurukulams.core.store.CategoryStore;
+
+import javax.sql.DataSource;
+
 import static com.gurukulams.core.store.CategoryStore.id;
 import static com.gurukulams.core.store.CategoryStore.title;
 import static com.gurukulams.core.store.CategoryStore.modifiedBy;
@@ -43,6 +46,10 @@ public class CategoryService {
                 or cl.locale = ?
             """;
     /**
+     * Datasource for persistence.
+     */
+    private final DataSource dataSource;
+    /**
      * categoryStore.
      */
     private final CategoryStore categoryStore;
@@ -54,10 +61,12 @@ public class CategoryService {
 
     /**
      * Builds a new Category service.
-     *
+     * @param theDataSource
      * @param dataManager database manager.
      */
-    public CategoryService(final DataManager dataManager) {
+    public CategoryService(final DataSource theDataSource,
+                           final DataManager dataManager) {
+        this.dataSource = theDataSource;
         this.categoryStore = dataManager.getCategoryStore();
         this.categoryLocalizedStore
                 = dataManager.getCategoryLocalizedStore();
@@ -77,7 +86,7 @@ public class CategoryService {
             throws SQLException {
         category.withCreatedBy(userName);
         category.withCreatedAt(LocalDateTime.now());
-        this.categoryStore.insert().values(category).execute();
+        this.categoryStore.insert().values(category).execute(this.dataSource);
         if (locale != null) {
             createLocalized(locale, category);
         }
@@ -100,7 +109,7 @@ public class CategoryService {
                 null);
         return this.categoryLocalizedStore.insert()
                 .values(localized)
-                .execute();
+                .execute(this.dataSource);
     }
 
     /**
@@ -117,7 +126,8 @@ public class CategoryService {
             throws SQLException {
 
         if (locale == null) {
-            return this.categoryStore.select(id);
+            return this.categoryStore.select(this.dataSource,
+                    id);
         }
 
         return categoryStore.select()
@@ -126,7 +136,7 @@ public class CategoryService {
                 .param(locale(locale.getLanguage()))
                 .param(locale(locale.getLanguage()))
                 .param(id(id))
-                .optional();
+                .optional(this.dataSource);
     }
 
     /**
@@ -148,17 +158,18 @@ public class CategoryService {
             updatedRows = this.categoryStore.update()
                     .set(title(category.title()),
                             modifiedBy(userName))
-                    .where(id().eq(id)).execute();
+                    .where(id().eq(id)).execute(this.dataSource);
         } else {
             updatedRows = this.categoryStore.update()
                     .set(modifiedBy(userName))
-                    .where(id().eq(id)).execute();
+                    .where(id().eq(id)).execute(this.dataSource);
             if (updatedRows != 0) {
                 updatedRows = this.categoryLocalizedStore.update().set(
                         title(category.title()),
                         locale(locale.getLanguage()))
                         .where(categoryId().eq(id)
-                        .and().locale().eq(locale.getLanguage())).execute();
+                        .and().locale().eq(locale.getLanguage()))
+                        .execute(this.dataSource);
 
                 if (updatedRows == 0) {
                     updatedRows = createLocalized(locale, category);
@@ -183,13 +194,13 @@ public class CategoryService {
     public List<Category> list(final String userName,
                                final Locale locale) throws SQLException {
         if (locale == null) {
-            return this.categoryStore.select().execute();
+            return this.categoryStore.select().execute(this.dataSource);
         }
         return categoryStore.select().sql(READ_QUERY)
                 .param(locale(locale.getLanguage()))
                 .param(locale(locale.getLanguage()))
                 .param(locale(locale.getLanguage()))
-                .list();
+                .list(this.dataSource);
     }
 
     /**
@@ -203,9 +214,9 @@ public class CategoryService {
             throws SQLException {
         this.categoryLocalizedStore
                 .delete(categoryId().eq(id))
-                .execute();
+                .execute(this.dataSource);
         return this.categoryStore
-                    .delete(id) == 1;
+                    .delete(this.dataSource, id) == 1;
     }
 
     /**
@@ -214,9 +225,9 @@ public class CategoryService {
     public void delete() throws SQLException {
         this.categoryLocalizedStore
                 .delete()
-                .execute();
+                .execute(this.dataSource);
         this.categoryStore
                 .delete()
-                .execute();
+                .execute(this.dataSource);
     }
 }
