@@ -9,6 +9,7 @@ import com.gurukulams.core.payload.Profile;
 import com.gurukulams.core.store.HandleStore;
 import com.gurukulams.core.store.LearnerBuddyStore;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +23,10 @@ import static com.gurukulams.core.store.OrgLocalizedStore.locale;
  * Service Profile relates Requests.
  */
 public class ProfileService {
+    /**
+     * Datasource for persistence.
+     */
+    private final DataSource dataSource;
 
     /**
      * learnerStore.
@@ -49,16 +54,18 @@ public class ProfileService {
 
     /**
      * this is the constructor.
-     *
+     * @param theDataSource
      * @param dataManager
      * @param theLearnerService
      * @param theLearnerProfileService
      * @param theorgService
      */
-    public ProfileService(final DataManager dataManager,
+    public ProfileService(final DataSource theDataSource,
+                          final DataManager dataManager,
                           final LearnerService theLearnerService,
                           final LearnerProfileService theLearnerProfileService,
                           final OrgService theorgService) {
+        this.dataSource = theDataSource;
         this.learnerService = theLearnerService;
         this.learnerProfileService = theLearnerProfileService;
         this.handleStore =
@@ -77,7 +84,9 @@ public class ProfileService {
      */
     public Optional<Profile> read(final String userHandle) throws SQLException {
 
-        Optional<Handle> optionalHandle = this.handleStore.select(userHandle);
+        Optional<Handle> optionalHandle = this.handleStore
+                .select(this.dataSource,
+                userHandle);
 
         if (optionalHandle.isPresent()) {
             return Optional.ofNullable(getProfile(optionalHandle.get()));
@@ -96,7 +105,8 @@ public class ProfileService {
     public List<Profile> list(final String userName,
                           final Locale locale) throws SQLException {
 
-        List<Handle> handles = this.handleStore.select().execute();
+        List<Handle> handles = this.handleStore.select()
+                .execute(this.dataSource);
 
         if (!handles.isEmpty()) {
             List<Profile> profiles = new ArrayList<>(handles.size());
@@ -118,7 +128,8 @@ public class ProfileService {
     public boolean isRegistered(final String userName,
                                 final String userToFollow)
             throws SQLException {
-        return this.learnerBuddyStore.exists(userToFollow, userName);
+        return this.learnerBuddyStore.exists(this.dataSource,
+                userToFollow, userName);
     }
     /**
      * Register for an Org..
@@ -137,7 +148,7 @@ public class ProfileService {
             return this.learnerBuddyStore
                     .insert()
                     .values(learnerBuddy)
-                    .execute() == 1;
+                    .execute(this.dataSource) == 1;
         } else {
             throw new IllegalArgumentException("Learner not found");
         }
@@ -153,7 +164,7 @@ public class ProfileService {
 
         for (LearnerBuddy orgLearner : this.learnerBuddyStore
                 .select().where(LearnerBuddyStore.learnerHandle().eq(userName))
-                .execute()) {
+                .execute(this.dataSource)) {
             orgs.add(this.read(orgLearner.buddyHandle()).get());
         }
         return orgs;

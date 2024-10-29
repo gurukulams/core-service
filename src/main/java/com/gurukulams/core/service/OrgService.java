@@ -10,6 +10,8 @@ import com.gurukulams.core.store.OrgLearnerStore;
 import com.gurukulams.core.store.OrgLocalizedStore;
 import com.gurukulams.core.store.OrgStore;
 
+import javax.sql.DataSource;
+
 import static com.gurukulams.core.store.OrgLocalizedStore.locale;
 import static com.gurukulams.core.store.OrgStore.userHandle;
 import static com.gurukulams.core.store.OrgStore.title;
@@ -57,7 +59,10 @@ public class OrgService {
      * Separator for Handle.
      */
     private static final String SEPARATOR = "-";
-
+    /**
+     * Datasource for persistence.
+     */
+    private final DataSource dataSource;
     /**
      * orgStore.
      */
@@ -80,10 +85,12 @@ public class OrgService {
 
     /**
      * Builds a new Org service.
-     *
+     * @param theDataSource
      * @param dataManager database manager.
      */
-    public OrgService(final DataManager dataManager) {
+    public OrgService(final DataSource theDataSource,
+                      final DataManager dataManager) {
+        this.dataSource = theDataSource;
         this.orgStore = dataManager.getOrgStore();
         this.orgLocalizedStore
                 = dataManager.getOrgLocalizedStore();
@@ -114,10 +121,10 @@ public class OrgService {
         this.handleStore
                 .insert()
                         .values(handle)
-                                .execute();
+                                .execute(this.dataSource);
         org = org.withCreatedBy(userName);
         org = org.withCreatedAt(LocalDateTime.now());
-        this.orgStore.insert().values(org).execute();
+        this.orgStore.insert().values(org).execute(this.dataSource);
         if (locale != null) {
             createLocalized(locale, org);
         }
@@ -140,7 +147,7 @@ public class OrgService {
                 org.description());
         return this.orgLocalizedStore.insert()
                 .values(localized)
-                .execute();
+                .execute(this.dataSource);
     }
 
     /**
@@ -157,7 +164,8 @@ public class OrgService {
             throws SQLException {
 
         if (locale == null) {
-            return this.orgStore.select(userHandle);
+            return this.orgStore.select(this.dataSource,
+                    userHandle);
         }
 
         return orgStore.select()
@@ -166,7 +174,7 @@ public class OrgService {
                 .param(locale(locale.getLanguage()))
                 .param(locale(locale.getLanguage()))
                 .param(userHandle(userHandle))
-                .optional();
+                .optional(this.dataSource);
     }
 
     /**
@@ -190,11 +198,13 @@ public class OrgService {
                             description(org.description()),
                             imageUrl(org.imageUrl()),
                             modifiedBy(userName))
-                    .where(userHandle().eq(userHandle)).execute();
+                    .where(userHandle().eq(userHandle))
+                    .execute(this.dataSource);
         } else {
             updatedRows = this.orgStore.update()
                     .set(modifiedBy(userName))
-                    .where(userHandle().eq(userHandle)).execute();
+                    .where(userHandle().eq(userHandle))
+                    .execute(this.dataSource);
             if (updatedRows != 0) {
                 updatedRows = this.orgLocalizedStore.update().set(
                                 title(org.title()),
@@ -202,7 +212,7 @@ public class OrgService {
                                 locale(locale.getLanguage()))
                         .where(OrgLocalizedStore.userHandle().eq(userHandle)
                                 .and().locale().eq(locale.getLanguage()))
-                        .execute();
+                        .execute(this.dataSource);
 
                 if (updatedRows == 0) {
                     updatedRows = createLocalized(locale, org);
@@ -227,13 +237,13 @@ public class OrgService {
     public List<Org> list(final String userName,
                                final Locale locale) throws SQLException {
         if (locale == null) {
-            return this.orgStore.select().execute();
+            return this.orgStore.select().execute(this.dataSource);
         }
         return orgStore.select().sql(READ_QUERY)
                 .param(locale(locale.getLanguage()))
                 .param(locale(locale.getLanguage()))
                 .param(locale(locale.getLanguage()))
-                .list();
+                .list(this.dataSource);
     }
 
     /**
@@ -249,7 +259,7 @@ public class OrgService {
 
         for (OrgLearner orgLearner : this.orgLearnerStore
                 .select().where(OrgLearnerStore.learnerHandle().eq(userName))
-                .execute()) {
+                .execute(this.dataSource)) {
             orgs.add(this.read(userName, orgLearner.orgHandle(),
                     locale).get());
         }
@@ -267,7 +277,8 @@ public class OrgService {
     public boolean isRegistered(final String userName,
                                 final String orgHanle)
             throws SQLException {
-        return this.orgLearnerStore.exists(orgHanle, userName);
+        return this.orgLearnerStore.exists(this.dataSource,
+                orgHanle, userName);
     }
 
     /**
@@ -287,7 +298,7 @@ public class OrgService {
             return this.orgLearnerStore
                     .insert()
                     .values(eventLearner)
-                    .execute() == 1;
+                    .execute(this.dataSource) == 1;
         } else {
             throw new IllegalArgumentException("Org not found");
         }
@@ -305,15 +316,16 @@ public class OrgService {
 
         this.orgLocalizedStore
                 .delete(OrgLocalizedStore.userHandle().eq(orgHandle))
-                .execute();
+                .execute(this.dataSource);
         this.orgLearnerStore
                 .delete(OrgLearnerStore.orgHandle().eq(orgHandle))
-                .execute();
+                .execute(this.dataSource);
         this.orgStore
-                .delete(orgHandle);
+                .delete(this.dataSource,
+                        orgHandle);
         return this.handleStore
                 .delete(HandleStore.userHandle().eq(orgHandle))
-                .execute() == 1;
+                .execute(this.dataSource) == 1;
     }
 
     /**
@@ -322,15 +334,15 @@ public class OrgService {
     public void delete() throws SQLException {
         this.orgLocalizedStore
                 .delete()
-                .execute();
+                .execute(this.dataSource);
         this.orgLearnerStore
                 .delete()
-                .execute();
+                .execute(this.dataSource);
         this.orgStore
                 .delete()
-                .execute();
+                .execute(this.dataSource);
         this.handleStore
                 .delete(HandleStore.type().eq(HANDLE_TYPE))
-                .execute();
+                .execute(this.dataSource);
     }
 }

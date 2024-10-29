@@ -32,11 +32,13 @@ class OrgServiceTest {
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
 
         Validator validator = validatorFactory.getValidator();
-        this.learnerService = new LearnerService(TestUtil.dataManager(), validator);
-        this.orgService = new OrgService(TestUtil.dataManager());
-        this.profileService = new ProfileService(TestUtil.dataManager(),
+        this.learnerService = new LearnerService(TestUtil.getDataSource(),
+                TestUtil.dataManager(), validator);
+        this.orgService = new OrgService(TestUtil.getDataSource(),
+                TestUtil.dataManager());
+        this.profileService = new ProfileService(TestUtil.getDataSource(), TestUtil.dataManager(),
                 this.learnerService,
-                new LearnerProfileService(TestUtil.dataManager(), validator),
+                new LearnerProfileService(TestUtil.getDataSource(), TestUtil.dataManager(), validator),
                 this.orgService);
     }
 

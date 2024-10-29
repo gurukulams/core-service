@@ -25,7 +25,7 @@ class LearnerServiceTest {
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
 
         Validator validator = validatorFactory.getValidator();
-        this.learnerService = new LearnerService(TestUtil.dataManager(), validator);
+        this.learnerService = new LearnerService(TestUtil.getDataSource(), TestUtil.dataManager(), validator);
     }
 
     @BeforeEach

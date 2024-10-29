@@ -21,7 +21,7 @@ class TagServiceTest {
     private final TagService tagService;
 
     TagServiceTest() {
-        this.tagService = new TagService(TestUtil.dataManager());
+        this.tagService = new TagService(TestUtil.getDataSource(), TestUtil.dataManager());
     }
 
     /**

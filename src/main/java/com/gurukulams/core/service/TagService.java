@@ -5,6 +5,9 @@ import com.gurukulams.core.model.Tag;
 import com.gurukulams.core.model.TagLocalized;
 import com.gurukulams.core.store.TagLocalizedStore;
 import com.gurukulams.core.store.TagStore;
+
+import javax.sql.DataSource;
+
 import static com.gurukulams.core.store.TagStore.id;
 import static com.gurukulams.core.store.TagStore.title;
 import static com.gurukulams.core.store.TagStore.modifiedBy;
@@ -43,6 +46,10 @@ public class TagService {
                 or cl.locale = ?
             """;
     /**
+     * Datasource for persistence.
+     */
+    private final DataSource dataSource;
+    /**
      * tagStore.
      */
     private final TagStore tagStore;
@@ -54,10 +61,12 @@ public class TagService {
 
     /**
      * Builds a new Tag service.
-     *
+     * @param theDataSource
      * @param dataManager database manager.
      */
-    public TagService(final DataManager dataManager) {
+    public TagService(final DataSource theDataSource,
+                      final DataManager dataManager) {
+        this.dataSource = theDataSource;
         this.tagStore = dataManager.getTagStore();
         this.tagLocalizedStore
                 = dataManager.getTagLocalizedStore();
@@ -77,7 +86,7 @@ public class TagService {
             throws SQLException {
         tag.withCreatedBy(userName);
         tag.withCreatedAt(LocalDateTime.now());
-        this.tagStore.insert().values(tag).execute();
+        this.tagStore.insert().values(tag).execute(this.dataSource);
         if (locale != null) {
             createLocalized(locale, tag);
         }
@@ -100,7 +109,7 @@ public class TagService {
                 null);
         return this.tagLocalizedStore.insert()
                 .values(localized)
-                .execute();
+                .execute(this.dataSource);
     }
 
     /**
@@ -117,7 +126,8 @@ public class TagService {
             throws SQLException {
 
         if (locale == null) {
-            return this.tagStore.select(id);
+            return this.tagStore.select(this.dataSource,
+                    id);
         }
 
         return tagStore.select()
@@ -126,7 +136,7 @@ public class TagService {
                 .param(locale(locale.getLanguage()))
                 .param(locale(locale.getLanguage()))
                 .param(id(id))
-                .optional();
+                .optional(this.dataSource);
     }
 
     /**
@@ -148,17 +158,18 @@ public class TagService {
             updatedRows = this.tagStore.update()
                     .set(title(tag.title()),
                             modifiedBy(userName))
-                    .where(id().eq(id)).execute();
+                    .where(id().eq(id)).execute(this.dataSource);
         } else {
             updatedRows = this.tagStore.update()
                     .set(modifiedBy(userName))
-                    .where(id().eq(id)).execute();
+                    .where(id().eq(id)).execute(this.dataSource);
             if (updatedRows != 0) {
                 updatedRows = this.tagLocalizedStore.update().set(
                         title(tag.title()),
                         locale(locale.getLanguage()))
                         .where(tagId().eq(id)
-                        .and().locale().eq(locale.getLanguage())).execute();
+                        .and().locale().eq(locale.getLanguage()))
+                        .execute(this.dataSource);
 
                 if (updatedRows == 0) {
                     updatedRows = createLocalized(locale, tag);
@@ -183,13 +194,13 @@ public class TagService {
     public List<Tag> list(final String userName,
                                final Locale locale) throws SQLException {
         if (locale == null) {
-            return this.tagStore.select().execute();
+            return this.tagStore.select().execute(this.dataSource);
         }
         return tagStore.select().sql(READ_QUERY)
                 .param(locale(locale.getLanguage()))
                 .param(locale(locale.getLanguage()))
                 .param(locale(locale.getLanguage()))
-                .list();
+                .list(this.dataSource);
     }
 
     /**
@@ -203,9 +214,10 @@ public class TagService {
             throws SQLException {
         this.tagLocalizedStore
                 .delete(tagId().eq(id))
-                .execute();
+                .execute(this.dataSource);
         return this.tagStore
-                    .delete(id) == 1;
+                    .delete(this.dataSource,
+                            id) == 1;
     }
 
     /**
@@ -214,9 +226,9 @@ public class TagService {
     public void delete() throws SQLException {
         this.tagLocalizedStore
                 .delete()
-                .execute();
+                .execute(this.dataSource);
         this.tagStore
                 .delete()
-                .execute();
+                .execute(this.dataSource);
     }
 }

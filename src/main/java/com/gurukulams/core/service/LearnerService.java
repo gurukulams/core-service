@@ -13,6 +13,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -23,6 +24,10 @@ import java.util.function.Function;
  * The type Learner service.
  */
 public class LearnerService {
+    /**
+     * Datasource for persistence.
+     */
+    private final DataSource dataSource;
     /**
      * learnerStore.
      */
@@ -47,13 +52,15 @@ public class LearnerService {
 
     /**
      * this is the constructor.
-     *
+     * @param theDataSource
      * @param dataManager the gurukulams manager
      * @param pValidator        the p validator
      */
-    public LearnerService(final DataManager dataManager,
+    public LearnerService(final DataSource theDataSource,
+                          final DataManager dataManager,
                           final Validator
                                   pValidator) {
+        this.dataSource = theDataSource;
         this.validator = pValidator;
         this.learnerStore = dataManager.getLearnerStore();
         this.handleStore = dataManager.getHandleStore();
@@ -107,7 +114,8 @@ public class LearnerService {
     private Learner create(final Learner learner) throws SQLException {
         return getLearner(this.learnerStore
                 .insert()
-                .values(getLearner(learner)).returning());
+                .values(getLearner(learner))
+                .returning(this.dataSource));
     }
 
     /**
@@ -118,7 +126,8 @@ public class LearnerService {
      * @throws SQLException the sql exception
      */
     public Optional<Learner> read(final String userHandle) throws SQLException {
-        return getLearner(this.learnerStore.select(userHandle));
+        return getLearner(this.learnerStore
+                .select(this.dataSource, userHandle));
     }
 
     /**
@@ -129,7 +138,8 @@ public class LearnerService {
      */
     public Optional<Learner> readByEmail(final String email)
             throws SQLException {
-        return getLearner(learnerStore.selectByEmail(email));
+        return getLearner(learnerStore.selectByEmail(this.dataSource,
+                email));
     }
 
     /**
@@ -153,7 +163,7 @@ public class LearnerService {
         final int updatedRows = learnerStore.update()
                 .set(learnerModel)
                 .where(LearnerStore.userHandle().eq(userHandle))
-                .execute();
+                .execute(this.dataSource);
         if (updatedRows == 0) {
             throw new IllegalArgumentException("Learner not found");
         }
@@ -165,7 +175,7 @@ public class LearnerService {
             throws SQLException {
         Handle handle = new Handle(userHandle, "Learner");
         return Optional.of(this.handleStore.insert()
-                .values(handle).returning());
+                .values(handle).returning(this.dataSource));
     }
 
 
@@ -175,10 +185,11 @@ public class LearnerService {
      * @throws SQLException the sql exception
      */
     public void delete() throws SQLException {
-        learnerBuddyStore.delete().execute();
-        learnerProfileStore.delete().execute();
-        learnerStore.delete().execute();
-        handleStore.delete(HandleStore.type().eq("Learner")).execute();
+        learnerBuddyStore.delete().execute(this.dataSource);
+        learnerProfileStore.delete().execute(this.dataSource);
+        learnerStore.delete().execute(this.dataSource);
+        handleStore.delete(HandleStore.type().eq("Learner"))
+                .execute(this.dataSource);
 
     }
 

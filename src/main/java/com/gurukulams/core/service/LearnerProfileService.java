@@ -11,6 +11,7 @@ import jakarta.validation.Validator;
 import jakarta.validation.metadata.ConstraintDescriptor;
 import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
 
+import javax.sql.DataSource;
 import java.lang.annotation.ElementType;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -35,6 +36,10 @@ public class LearnerProfileService {
      */
     private static final int MIN_AGE = 10;
     /**
+     * Datasource for persistence.
+     */
+    private final DataSource dataSource;
+    /**
      * jdbcClient.
      */
     private final LearnerProfileStore learnerProfileStore;
@@ -46,14 +51,16 @@ public class LearnerProfileService {
 
     /**
      * Instantiates a new Learner profile service.
-     *
+     * @param theDataSource
      * @param dataManager the jdbc client
      * @param pValidator
      */
     public LearnerProfileService(
+            final DataSource theDataSource,
             final DataManager dataManager,
             final Validator
                     pValidator) {
+        this.dataSource = theDataSource;
         this.learnerProfileStore =
                 dataManager.getLearnerProfileStore();
         this.validator = pValidator;
@@ -80,7 +87,7 @@ public class LearnerProfileService {
                 registrationRequest.getName(),
                 registrationRequest.getDob());
         return this.learnerProfileStore.insert()
-                .values(learnerProfile).returning();
+                .values(learnerProfile).returning(this.dataSource);
     }
 
     private Set<ConstraintViolation<RegistrationRequest>>
@@ -126,7 +133,8 @@ public class LearnerProfileService {
      */
     public Optional<LearnerProfile> read(final String userHandle)
             throws SQLException {
-            return this.learnerProfileStore.select(userHandle);
+            return this.learnerProfileStore.select(this.dataSource,
+                    userHandle);
 
     }
 
@@ -135,6 +143,6 @@ public class LearnerProfileService {
      * @throws SQLException
      */
     public void delete() throws SQLException {
-        this.learnerProfileStore.delete().execute();
+        this.learnerProfileStore.delete().execute(this.dataSource);
     }
 }

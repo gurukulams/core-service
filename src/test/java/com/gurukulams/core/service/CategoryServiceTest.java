@@ -21,7 +21,7 @@ class CategoryServiceTest {
     private final CategoryService categoryService;
 
     CategoryServiceTest() {
-        this.categoryService = new CategoryService(TestUtil.dataManager());
+        this.categoryService = new CategoryService(TestUtil.getDataSource(), TestUtil.dataManager());
     }
 
     /**
