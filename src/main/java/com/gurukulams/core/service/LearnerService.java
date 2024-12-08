@@ -188,7 +188,8 @@ public class LearnerService {
         learnerBuddyStore.delete().execute(this.dataSource);
         learnerProfileStore.delete().execute(this.dataSource);
         learnerStore.delete().execute(this.dataSource);
-        handleStore.delete(HandleStore.type().eq("Learner"))
+        handleStore.delete()
+                .where(HandleStore.type().eq("Learner"))
                 .execute(this.dataSource);
 
     }

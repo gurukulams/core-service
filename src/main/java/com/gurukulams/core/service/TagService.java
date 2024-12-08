@@ -213,7 +213,8 @@ public class TagService {
     public boolean delete(final String userName, final String id)
             throws SQLException {
         this.tagLocalizedStore
-                .delete(tagId().eq(id))
+                .delete()
+                .where(tagId().eq(id))
                 .execute(this.dataSource);
         return this.tagStore
                     .delete(this.dataSource,

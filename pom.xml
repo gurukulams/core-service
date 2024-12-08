@@ -25,7 +25,7 @@
 		<checkstyle.version>10.3.2</checkstyle.version>
 		<asm.version>9.4</asm.version>
 
-		<postgresql.version>42.5.4</postgresql.version>
+		<postgresql.version>42.7.2</postgresql.version>
 		<flyway-core.version>9.21.1</flyway-core.version>
 		<maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
 		<exec-maven-plugin.version>3.1.0</exec-maven-plugin.version>
