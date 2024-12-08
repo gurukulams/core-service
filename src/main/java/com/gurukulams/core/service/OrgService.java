@@ -315,16 +315,19 @@ public class OrgService {
             throws SQLException {
 
         this.orgLocalizedStore
-                .delete(OrgLocalizedStore.userHandle().eq(orgHandle))
+                .delete()
+                .where(OrgLocalizedStore.userHandle().eq(orgHandle))
                 .execute(this.dataSource);
         this.orgLearnerStore
-                .delete(OrgLearnerStore.orgHandle().eq(orgHandle))
+                .delete()
+                .where(OrgLearnerStore.orgHandle().eq(orgHandle))
                 .execute(this.dataSource);
         this.orgStore
                 .delete(this.dataSource,
                         orgHandle);
         return this.handleStore
-                .delete(HandleStore.userHandle().eq(orgHandle))
+                .delete()
+                .where(HandleStore.userHandle().eq(orgHandle))
                 .execute(this.dataSource) == 1;
     }
 
@@ -342,7 +345,8 @@ public class OrgService {
                 .delete()
                 .execute(this.dataSource);
         this.handleStore
-                .delete(HandleStore.type().eq(HANDLE_TYPE))
+                .delete()
+                .where(HandleStore.type().eq(HANDLE_TYPE))
                 .execute(this.dataSource);
     }
 }

@@ -213,7 +213,8 @@ public class CategoryService {
     public boolean delete(final String userName, final String id)
             throws SQLException {
         this.categoryLocalizedStore
-                .delete(categoryId().eq(id))
+                .delete()
+                .where(categoryId().eq(id))
                 .execute(this.dataSource);
         return this.categoryStore
                     .delete(this.dataSource, id) == 1;
