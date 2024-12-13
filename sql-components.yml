@@ -1,9 +1,9 @@
 # Connection Details
 name: "Gurukulams"
-url: "jdbc:postgresql://localhost:5432/gurukulams_db"
-userName: "tom"
-password: "password"
-schemaName: "gurukulams_db"
+url: "jdbc:h2:~/test"
+userName: "sa"
+password: ""
+schemaName: "PUBLIC"
 
 # Mapping Logic
 rootPackage: "com.gurukulams.core"
