@@ -23,11 +23,10 @@
 		<maven.checkstyle.version>3.6.0</maven.checkstyle.version>
 		<checkstyle.version>10.3.2</checkstyle.version>
 
-		<postgresql.version>42.7.2</postgresql.version>
 		<flyway-core.version>9.21.1</flyway-core.version>
 		<maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
 		<exec-maven-plugin.version>3.1.0</exec-maven-plugin.version>
-		<h2.version>2.2.224</h2.version>
+		<h2.version>2.2.220</h2.version>
 		<jakarta.validation-api.version>3.0.2</jakarta.validation-api.version>
 		<jakarta.el-api.version>5.0.1</jakarta.el-api.version>
 		<jakarta.el.version>5.0.0-M1</jakarta.el.version>
@@ -91,12 +90,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<version>${postgresql.version}</version>
-		</dependency>
-
-		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<version>${h2.version}</version>
@@ -140,9 +133,9 @@
 				</executions>
 				<dependencies>
 					<dependency>
-						<groupId>org.postgresql</groupId>
-						<artifactId>postgresql</artifactId>
-						<version>${postgresql.version}</version>
+						<groupId>com.h2database</groupId>
+						<artifactId>h2</artifactId>
+						<version>${h2.version}</version>
 					</dependency>
 
 					<dependency>
