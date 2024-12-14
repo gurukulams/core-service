@@ -18,8 +18,6 @@ jobs:
       with:
         java-version: '21'
         distribution: 'temurin'
-    - name: Build the Infrastructure
-      run: docker compose up -d
     - name: Quality Check
       run: ./mvnw --quiet -s $GITHUB_WORKSPACE/src/main/res/.m2/settings.xml -B jacoco:prepare-agent install jacoco:report --file pom.xml
       env:
