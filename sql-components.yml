@@ -1,6 +1,6 @@
 # Connection Details
 name: "Gurukulams"
-url: "jdbc:h2:~/test"
+url: "jdbc:h2:./target/test"
 userName: "sa"
 password: ""
 schemaName: "PUBLIC"
@@ -12,11 +12,11 @@ wordsMap:
   events: event
 
 insertMap:
-    created_at: CURRENT_TIMESTAMP
+    CREATED_AT: CURRENT_TIMESTAMP
     MODIFIED_AT:
     MODIFIED_BY:
 updateMap:
-    created_at:
+    CREATED_AT:
     CREATED_BY:
     MODIFIED_AT: CURRENT_TIMESTAMP
     org_type:
