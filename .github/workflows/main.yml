@@ -14,8 +14,6 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
-      - name: Build the Infrastructure
-        run: docker compose up -d
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
