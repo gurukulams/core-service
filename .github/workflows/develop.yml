@@ -18,6 +18,11 @@ jobs:
       with:
         java-version: '21'
         distribution: 'temurin'
+    - name: Build
+      run: ./mvnw --quiet -s $GITHUB_WORKSPACE/src/main/res/.m2/settings.xml -B clean package --file pom.xml
+      env:
+        USER_NAME: ${{ secrets.GH_PACKAGE_USER }}
+        ACCESS_TOKEN: ${{ secrets.GH_PACKAGE_TOKEN }}
     - name: Quality Check
       run: ./mvnw --quiet -s $GITHUB_WORKSPACE/src/main/res/.m2/settings.xml -B jacoco:prepare-agent install jacoco:report --file pom.xml
       env:
