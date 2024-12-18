@@ -23,7 +23,7 @@ jobs:
           server-id: github
           settings-path: ${{ github.workspace }}
       - name: Build
-        run: ./mvnw --quiet -s $GITHUB_WORKSPACE/src/main/res/.m2/settings.xml -B clean package --file pom.xml
+        run: ./mvnw -s $GITHUB_WORKSPACE/src/main/res/.m2/settings.xml -B clean package --file pom.xml
         env:
           USER_NAME: ${{ secrets.GH_PACKAGE_USER }}
           ACCESS_TOKEN: ${{ secrets.GH_PACKAGE_TOKEN }}
