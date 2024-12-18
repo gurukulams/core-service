@@ -8,9 +8,6 @@ schemaName: "PUBLIC"
 # Mapping Logic
 rootPackage: "com.gurukulams.core"
 
-wordsMap:
-  events: event
-
 insertMap:
     CREATED_AT: CURRENT_TIMESTAMP
     MODIFIED_AT:
