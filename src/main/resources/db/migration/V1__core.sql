@@ -10,7 +10,7 @@ CREATE TABLE learner (
     image_url VARCHAR(200) NOT NULL,
     provider VARCHAR(50) DEFAULT 'local' NOT NULL,
     pword VARCHAR(200),
-    created_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP,
     modified_at TIMESTAMP ,
     CONSTRAINT learner_email_constraint UNIQUE (email),
     FOREIGN KEY (user_handle) REFERENCES handle (user_handle)

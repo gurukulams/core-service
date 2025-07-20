@@ -2,7 +2,7 @@ CREATE TABLE category (
     id VARCHAR(40) PRIMARY KEY,
     title VARCHAR(200),
     description VARCHAR(800),
-    created_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP,
     created_by VARCHAR(40) NOT NULL,
     modified_at TIMESTAMP,
     modified_by VARCHAR(40)
@@ -21,7 +21,7 @@ CREATE TABLE tag (
     id VARCHAR(40) PRIMARY KEY,
     title VARCHAR(200),
     description VARCHAR(800),
-    created_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP,
     created_by VARCHAR(40) NOT NULL,
     modified_at TIMESTAMP,
     modified_by VARCHAR(40)
