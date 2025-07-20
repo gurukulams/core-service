@@ -4,7 +4,7 @@ CREATE TABLE org (
     description VARCHAR(800) NOT NULL,
     org_type VARCHAR(40) NOT NULL,
     image_url VARCHAR(200) NOT NULL,
-    created_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP,
     created_by VARCHAR(40) NOT NULL,
     modified_at TIMESTAMP,
     modified_by VARCHAR(40),
